@@ -25,6 +25,8 @@ private:
 	void Paint();
 
 	void UpdateLayered();
+
+	void CalcPos(int cx, int cy, int& x, int& y);
 public:
 	ECK_CWND_SINGLEOWNER(CWndMain);
 	ECK_CWND_CREATE_CLS_HINST(eck::WCN_DUMMY, eck::g_hInstance);
@@ -32,4 +34,6 @@ public:
 	LRESULT OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
 
 	void UpdateFont();
+
+	void UpdatePos();
 };

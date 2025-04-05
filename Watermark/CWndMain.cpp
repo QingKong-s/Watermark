@@ -63,6 +63,35 @@ void CWndMain::UpdateLayered()
 		m_DC.GetDC(), &pt, 0, &bf, ULW_ALPHA);
 }
 
+void CWndMain::CalcPos(int cx, int cy, int& x, int& y)
+{
+	const auto hMon = MonitorFromWindow(m_hWnd, MONITOR_DEFAULTTONEAREST);
+	MONITORINFO mi;
+	mi.cbSize = sizeof(mi);
+	GetMonitorInfoW(hMon, &mi);
+	const auto dx = eck::DpiScale(g_Options.dx, m_iDpi);
+	const auto dy = eck::DpiScale(g_Options.dy, m_iDpi);
+	switch (g_Options.ePos)
+	{
+	case PosType::TopLeft:
+		x = mi.rcWork.left + dx;
+		y = mi.rcWork.top + dy;
+		break;
+	case PosType::TopRight:
+		x = mi.rcWork.right - cx - dx;
+		y = mi.rcWork.top + dy;
+		break;
+	case PosType::BottomLeft:
+		x = mi.rcWork.left + dx;
+		y = mi.rcWork.bottom - cy - dy;
+		break;
+	default:
+		x = mi.rcWork.right - cx - dx;
+		y = mi.rcWork.bottom - cy - dy;
+		break;
+	}
+}
+
 LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
@@ -87,7 +116,11 @@ LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		eck::MsgOnSysColorChangeMainWnd(hWnd, wParam, lParam);
 		break;
 	case WM_SETTINGCHANGE:
-		eck::MsgOnSettingChangeMainWnd(hWnd, wParam, lParam);
+		if (eck::MsgOnSettingChangeMainWnd(hWnd, wParam, lParam))
+		{
+			Paint();
+			UpdateLayered();
+		}
 		break;
 	case WM_DPICHANGED:
 		m_iDpi = LOWORD(wParam);
@@ -129,6 +162,14 @@ void CWndMain::UpdateFont()
 	UpdatePosSize();
 }
 
+void CWndMain::UpdatePos()
+{
+	int x, y;
+	CalcPos(m_cxClient, m_cyClient, x, y);
+	SetWindowPos(HWnd, nullptr, x, y, 0, 0,
+		SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
+}
+
 void CWndMain::UpdatePosSize()
 {
 	float cxF, cyF;
@@ -144,36 +185,11 @@ void CWndMain::UpdatePosSize()
 	cxF = std::max(cxF, rcText.Width);
 	cyF += (m_cyPadding + rcText.Height);
 	m_cyLine2 = rcText.Height;
-	const auto cx = (int)roundf(cxF);
-	const auto cy = (int)roundf(cyF);
-	
-	const auto hMon = MonitorFromWindow(m_hWnd, MONITOR_DEFAULTTONEAREST);
-	MONITORINFO mi;
-	mi.cbSize = sizeof(mi);
-	GetMonitorInfoW(hMon, &mi);
-	const auto rcWork = mi.rcWork;
+	const auto cx = int(ceilf(cxF) + eck::DpiScaleF(1.f, m_iDpi));
+	const auto cy = (int)ceilf(cyF);
+
 	int x, y;
-	const auto dx = eck::DpiScale(g_Options.dx, m_iDpi);
-	const auto dy = eck::DpiScale(g_Options.dy, m_iDpi);
-	switch (g_Options.ePos)
-	{
-	case PosType::TopLeft:
-		x = rcWork.left + dx;
-		y = rcWork.top + dy;
-		break;
-	case PosType::TopRight:
-		x = rcWork.right - cx - dx;
-		y = rcWork.top + dy;
-		break;
-	case PosType::BottomLeft:
-		x = rcWork.left + dx;
-		y = rcWork.bottom - cy - dy;
-		break;
-	default:
-		x = rcWork.right - cx - dx;
-		y = rcWork.bottom - cy - dy;
-		break;
-	}
+	CalcPos(cx, cy, x, y);
 
 	SetWindowPos(HWnd, nullptr, x, y, std::max(cx, 1), std::max(cy, 1),
 		SWP_NOZORDER | SWP_NOACTIVATE);

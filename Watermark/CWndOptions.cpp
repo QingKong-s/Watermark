@@ -14,7 +14,6 @@ ItemsPos[]
 	{ L"右上" },
 	{ L"左下" },
 	{ L"右下" },
-	{ L"居中" },
 };
 
 constexpr static struct
@@ -56,7 +55,7 @@ void CWndOptions::UpdateDpi()
 void CWndOptions::OnCreate(HWND hWnd)
 {
 	TrayAdd(0, LoadIconW(nullptr, IDI_APPLICATION), L"QksWatermark\r\n双击显示选项，右键退出");
-	
+
 	m_iDpi = eck::GetDpi(hWnd);
 
 	const auto xMar = eck::DpiScale(2, m_iDpi);
@@ -99,6 +98,7 @@ void CWndOptions::OnCreate(HWND hWnd)
 	m_EDPadding.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 		0, 0, 0, 0, hWnd, 0);
 	m_EDPadding.SetInputMode(eck::CEditExt::InputMode::Int);
+	m_EDPadding.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
 	m_Layout.Add(&m_EDPadding, iLine, 3, Mar, eck::LF_FILL);
 
 	++iLine;
@@ -110,6 +110,7 @@ void CWndOptions::OnCreate(HWND hWnd)
 	m_EDDx.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 		0, 0, 0, 0, hWnd, 0);
 	m_EDDx.SetInputMode(eck::CEditExt::InputMode::Int);
+	m_EDDx.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
 	m_Layout.Add(&m_EDDx, iLine, 1, Mar, eck::LF_FILL);
 
 	m_LADy.Create(L"垂直边距：", dwStyleStatic, 0,
@@ -119,6 +120,7 @@ void CWndOptions::OnCreate(HWND hWnd)
 	m_EDDy.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 		0, 0, 0, 0, hWnd, 0);
 	m_EDDy.SetInputMode(eck::CEditExt::InputMode::Int);
+	m_EDDy.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
 	m_Layout.Add(&m_EDDy, iLine, 3, Mar, eck::LF_FILL);
 
 	++iLine;
@@ -284,8 +286,8 @@ void CWndOptions::OptToUI()
 
 void CWndOptions::UIToOpt()
 {
-	g_Options.bUia =!!m_CBUia.GetCheckState();
-	g_Options.bAutoRun =!!m_CBAutoRun.GetCheckState();
+	g_Options.bUia = !!m_CBUia.GetCheckState();
+	g_Options.bAutoRun = !!m_CBAutoRun.GetCheckState();
 	g_Options.ePos = (PosType)m_CCBPos.GetListBox().GetCurrSel();
 	WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
 	m_EDPadding.GetText(szBuf, ARRAYSIZE(szBuf));
@@ -307,6 +309,45 @@ void CWndOptions::UIToOpt()
 	UIToColorOpt();
 
 	g_Options.ToIni();
+}
+
+LRESULT CWndOptions::EditArrowCtrl(HWND hWnd, UINT uMsg,
+	WPARAM wParam, LPARAM lParam, eck::SlotCtx& Ctx)
+{
+	switch (uMsg)
+	{
+	case WM_KEYDOWN:
+		if (wParam == VK_UP || wParam == VK_DOWN)
+		{
+			Ctx.Processed();
+			WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
+			GetWindowTextW(hWnd, szBuf, ARRAYSIZE(szBuf));
+			int iVal = _wtoi(szBuf);
+			if (wParam == VK_UP)
+				++iVal;
+			else if (wParam == VK_DOWN)
+				--iVal;
+			swprintf(szBuf, L"%d", iVal);
+			SetWindowTextW(hWnd, szBuf);
+			if (hWnd == m_EDPadding.HWnd)
+			{
+				g_Options.cyPadding = iVal;
+				m_pWndMain->UpdateFont();
+			}
+			else if (hWnd == m_EDDx.HWnd)
+			{
+				g_Options.dx = iVal;
+				m_pWndMain->UpdatePos();
+			}
+			else if (hWnd == m_EDDy.HWnd)
+			{
+				g_Options.dy = iVal;
+				m_pWndMain->UpdatePos();
+			}
+			return 0;
+		}
+	}
+	return 0;
 }
 
 LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -337,6 +378,22 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				p->Item.cchText = (int)ItemsTheme[p->Item.idxItem].svText.size();
 			}
 			return TRUE;
+			case eck::NM_LBN_ITEMCHANGED:
+			{
+				g_Options.eTheme = (ThemeType)m_CCBTheme.GetListBox().GetCurrSel();
+				ColorOptToUI();
+				if (g_Options.eTheme == ThemeType::Auto)
+				{
+					EnableWindow(m_CPKColor.HWnd, FALSE);
+					EnableWindow(m_EDColorAlpha.HWnd, FALSE);
+				}
+				else
+				{
+					EnableWindow(m_CPKColor.HWnd, TRUE);
+					EnableWindow(m_EDColorAlpha.HWnd, TRUE);
+				}
+			}
+			return 0;
 			}
 	}
 	break;
@@ -345,8 +402,8 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (HIWORD(wParam) == BN_CLICKED)
 			if (lParam == (LPARAM)m_BTGitHub.HWnd)
 			{
-				ShellExecuteW(nullptr, nullptr, 
-					L"https://github.com/QingKong-s/Watermark", 
+				ShellExecuteW(nullptr, nullptr,
+					L"https://github.com/QingKong-s/Watermark",
 					nullptr, nullptr, SW_SHOWNORMAL);
 				return 0;
 			}
@@ -363,7 +420,9 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			}
 			else if (lParam == (LPARAM)m_CBAutoRun.HWnd)
 			{
-				eck::SetAutoRun(L"qk_s_watermark_cxx", m_CBAutoRun.GetCheckState());
+				eck::SetAutoRun(L"qk_s_watermark_cxx",
+					m_CBAutoRun.GetCheckState(),
+					eck::AutoRunType::TaskScheduler | eck::AutoRunType::RunAdmin);
 				return 0;
 			}
 	}
@@ -371,7 +430,7 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_CLOSE:
 		Show(SW_HIDE);
-	return 0;
+		return 0;
 
 	case WM_SIZE:
 		OnSize(lParam);
@@ -408,12 +467,21 @@ BOOL CWndOptions::PreTranslateMessage(const MSG& Msg)
 void CWndOptions::OnTrayNotify(UINT uMsg, UINT uID, int x, int y)
 {
 	if (uMsg == WM_LBUTTONDBLCLK)
+	{
 		Show(SW_SHOW);
+		SetForegroundWindow(HWnd);
+	}
 	else if (uMsg == WM_RBUTTONUP)
+	{
+		if (m_bExitMsgBox)
+			return;
+		m_bExitMsgBox = TRUE;
 		if (MessageBoxW(HWnd, L"确定要退出吗？", L"退出", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
 			m_pWndMain->Destroy();
 			Destroy();
 			PostQuitMessage(0);
 		}
+		m_bExitMsgBox = FALSE;
+	}
 }

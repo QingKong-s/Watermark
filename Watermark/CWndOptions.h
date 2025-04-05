@@ -45,6 +45,7 @@ private:
 
 	HFONT m_hFont{};
 	int m_iDpi{ USER_DEFAULT_SCREEN_DPI };
+	BOOL m_bExitMsgBox{};
 	HICON m_hiGitHub{};
 
 	void UpdateDpi();
@@ -58,6 +59,9 @@ private:
 
 	void OptToUI();
 	void UIToOpt();
+
+	LRESULT EditArrowCtrl(HWND hWnd, UINT uMsg,
+		WPARAM wParam, LPARAM lParam, eck::SlotCtx& Ctx);
 public:
 	CWndOptions(CWndMain* pWndMain): m_pWndMain{ pWndMain } {}
 	ECK_CWND_SINGLEOWNER_NO_DEF_CONS(CWndOptions);

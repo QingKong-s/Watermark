@@ -48,7 +48,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	const auto iDpi = eck::GetMonitorDpi(hMon);
 
 	pWnd->Create(nullptr, WS_POPUP, 
-		WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST | WS_EX_NOACTIVATE,
+		WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
 		0, 0, 10, 10, nullptr, 0);
 	pWnd->UpdateFont();
 	pWnd->Show(SW_SHOWNOACTIVATE);

@@ -7,7 +7,7 @@ Options g_Options{};
 void Options::FromIni()
 {
 	eck::CIniExtMut Ini{};
-	const auto rbIni = eck::ReadInFile(L"Options.ini");
+	const auto rbIni = eck::ReadInFile((eck::GetRunningPath() + L"\\Options.ini").Data());
 	Ini.Load((PCWSTR)rbIni.Data(), rbIni.Size() / sizeof WCHAR);
 	auto Sec = Ini.GetSection(L"Watermark");
 
@@ -73,7 +73,8 @@ void Options::ToIni()
 
 	rs.Clear();
 	Ini.Save(rs);
-	eck::WriteToFile(L"Options.ini", rs.Data(), (DWORD)rs.ByteSizePure());
+	eck::WriteToFile((eck::GetRunningPath() + L"\\Options.ini").Data(),
+		rs.Data(), (DWORD)rs.ByteSizePure());
 }
 
 ARGB Options::GetCurrColor()
