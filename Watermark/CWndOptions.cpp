@@ -2,6 +2,7 @@
 #include "CWndOptions.h"
 #include "GlobalOptions.h"
 #include "CWndMain.h"
+#include "Res/resource.h"
 
 constexpr static struct
 {
@@ -32,7 +33,8 @@ enum
 {
 	BtnWidth = 100,
 	BtnHeight = 30,
-	BottomLineHeight = BtnHeight
+	BottomLineHeight = BtnHeight,
+	BtnIcon = 22,
 };
 
 void CWndOptions::UpdateDpi()
@@ -42,10 +44,19 @@ void CWndOptions::UpdateDpi()
 
 	m_CPKColor.SetItemHeight(0, eck::DpiScale(20, m_iDpi));
 	m_CPKColor.SetItemHeight(eck::DpiScale(24, m_iDpi));
+
+	const auto cxy = eck::DpiScale(BtnIcon, m_iDpi);
+	const auto hi = (HICON)LoadImageW(NtCurrentImageBaseHInst(),
+		MAKEINTRESOURCEW(IDI_ICON1), IMAGE_ICON, cxy, cxy, LR_DEFAULTSIZE);
+	m_BTGitHub.SetImage(hi, IMAGE_ICON);
+	DestroyIcon(m_hiGitHub);
+	m_hiGitHub = hi;
 }
 
 void CWndOptions::OnCreate(HWND hWnd)
 {
+	TrayAdd(0, LoadIconW(nullptr, IDI_APPLICATION), L"QksWatermark\r\n双击显示选项，右键退出");
+	
 	m_iDpi = eck::GetDpi(hWnd);
 
 	const auto xMar = eck::DpiScale(2, m_iDpi);
@@ -184,7 +195,7 @@ void CWndOptions::OnCreate(HWND hWnd)
 
 	const auto cxBtn = eck::DpiScale(BtnWidth, m_iDpi);
 	const auto cyBtn = eck::DpiScale(BtnHeight, m_iDpi);
-	m_BTGitHub.Create(L"GitHub", dwStyle | BS_PUSHBUTTON, 0,
+	m_BTGitHub.Create(L"饭桶中心", dwStyle | BS_PUSHBUTTON, 0,
 		0, 0, cxBtn, cyBtn, hWnd, 0);
 	m_LytBtn.Add(&m_BTGitHub, MarBtn, eck::LF_FIX);
 	m_BTReLoad.Create(L"重新加载", dwStyle | BS_PUSHBUTTON, 0,
@@ -334,7 +345,10 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		if (HIWORD(wParam) == BN_CLICKED)
 			if (lParam == (LPARAM)m_BTGitHub.HWnd)
 			{
-
+				ShellExecuteW(nullptr, nullptr, 
+					L"https://github.com/QingKong-s/Watermark", 
+					nullptr, nullptr, SW_SHOWNORMAL);
+				return 0;
 			}
 			else if (lParam == (LPARAM)m_BTReLoad.HWnd)
 			{
@@ -347,8 +361,17 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				m_pWndMain->UpdateFont();
 				return 0;
 			}
+			else if (lParam == (LPARAM)m_CBAutoRun.HWnd)
+			{
+				eck::SetAutoRun(L"qk_s_watermark_cxx", m_CBAutoRun.GetCheckState());
+				return 0;
+			}
 	}
 	break;
+
+	case WM_CLOSE:
+		Show(SW_HIDE);
+	return 0;
 
 	case WM_SIZE:
 		OnSize(lParam);
@@ -363,6 +386,14 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_CREATE:
 		OnCreate(hWnd);
 		break;
+	case WM_DESTROY:
+	{
+		DeleteObject(m_hFont);
+		m_hFont = nullptr;
+		DestroyIcon(m_hiGitHub);
+		m_hiGitHub = nullptr;
+	}
+	break;
 	}
 	return __super::OnMsg(hWnd, uMsg, wParam, lParam);
 }
@@ -372,4 +403,17 @@ BOOL CWndOptions::PreTranslateMessage(const MSG& Msg)
 	if (IsDialogMessageW(HWnd, (MSG*)&Msg))
 		return TRUE;
 	return __super::PreTranslateMessage(Msg);
+}
+
+void CWndOptions::OnTrayNotify(UINT uMsg, UINT uID, int x, int y)
+{
+	if (uMsg == WM_LBUTTONDBLCLK)
+		Show(SW_SHOW);
+	else if (uMsg == WM_RBUTTONUP)
+		if (MessageBoxW(HWnd, L"确定要退出吗？", L"退出", MB_YESNO | MB_ICONQUESTION) == IDYES)
+		{
+			m_pWndMain->Destroy();
+			Destroy();
+			PostQuitMessage(0);
+		}
 }

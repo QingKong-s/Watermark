@@ -114,7 +114,7 @@ void CWndMain::UpdateFont()
 	const float TextHeight2 = g_Options.iPoint2 * 96.f / 72.f;
 	m_cyLine1 = eck::DpiScaleF(TextHeight1, m_iDpi);
 	m_cyLine2 = eck::DpiScaleF(TextHeight2, m_iDpi);
-	m_cyPadding = eck::DpiScaleF(g_Options.cyPadding, m_iDpi);
+	m_cyPadding = eck::DpiScaleF((float)g_Options.cyPadding, m_iDpi);
 
 	GpFontFamily* pFontFamily1, * pFontFamily2;
 	GdipCreateFontFamilyFromName(g_Options.Font1.Data(), nullptr, &pFontFamily1);

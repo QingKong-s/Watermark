@@ -12,3 +12,4 @@
 #include "eck\CTableLayout.h"
 #include "eck\CLinearLayout.h"
 #include "eck\CIniExt.h"
+#include "eck\ShellHelper.h"

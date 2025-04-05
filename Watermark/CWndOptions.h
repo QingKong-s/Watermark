@@ -45,7 +45,7 @@ private:
 
 	HFONT m_hFont{};
 	int m_iDpi{ USER_DEFAULT_SCREEN_DPI };
-	BOOL m_bUpdated{};
+	HICON m_hiGitHub{};
 
 	void UpdateDpi();
 
@@ -66,4 +66,6 @@ public:
 	BOOL PreTranslateMessage(const MSG& Msg) override;
 
 	LRESULT OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+
+	void OnTrayNotify(UINT uMsg, UINT uID, int x, int y) override;
 };

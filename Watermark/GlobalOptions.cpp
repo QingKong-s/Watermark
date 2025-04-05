@@ -10,8 +10,6 @@ void Options::FromIni()
 	const auto rbIni = eck::ReadInFile(L"Options.ini");
 	Ini.Load((PCWSTR)rbIni.Data(), rbIni.Size() / sizeof WCHAR);
 	auto Sec = Ini.GetSection(L"Watermark");
-	if (!Sec)
-		Sec = Ini.CreateSection(L"Watermark");
 
 	g_Options.bUia = Ini.GetKeyValue(Sec, L"UIAccess").GetBool();
 	g_Options.bAutoRun = Ini.GetKeyValue(Sec, L"AutoRun").GetBool();
@@ -75,7 +73,7 @@ void Options::ToIni()
 
 	rs.Clear();
 	Ini.Save(rs);
-	eck::WriteToFile(L"Options.ini", rs.Data(), rs.ByteSizePure());
+	eck::WriteToFile(L"Options.ini", rs.Data(), (DWORD)rs.ByteSizePure());
 }
 
 ARGB Options::GetCurrColor()

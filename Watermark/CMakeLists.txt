@@ -6,13 +6,24 @@ add_executable(Watermark WIN32
 	"pch.cpp"
 	"MyEck/MyEck.cpp"
 	"CWndMain.cpp"
-	"1.manifest"
-	"CWndOptions.h"
 	"CWndOptions.cpp"
- "GlobalOptions.h" "GlobalOptions.cpp")
+	"GlobalOptions.cpp"
+	"1.manifest"
+	"Res/Resource.rc"
+)
+
+target_compile_definitions(Watermark PRIVATE
+	ECK_OPT_NO_DX=1
+	ECK_OPT_NO_YYJSON=1
+	ECK_OPT_NO_PUGIXML=1
+)
 
 set_property(TARGET Watermark PROPERTY
 	LINK_FLAGS "/MANIFESTUAC:level='requireAdministrator'"
+)
+list(APPEND CMAKE_RC_STANDARD_INCLUDE_DIRECTORIES 
+	CMAKE_C_STANDARD_INCLUDE_DIRECTORIES
+	CMAKE_C_STANDARD_INCLUDE_DIRECTORIES
 )
 
 target_precompile_headers(Watermark PRIVATE "pch.h")

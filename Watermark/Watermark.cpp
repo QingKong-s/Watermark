@@ -60,8 +60,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	pOptWnd->Create(L"选项", WS_OVERLAPPEDWINDOW | WS_POPUP,0,
 		pt.x, pt.y, size.cx, size.cy, nullptr, 0);
-	ShowWindow(pOptWnd->GetHWND(), SW_SHOW);
-	SetForegroundWindow(pOptWnd->GetHWND());
 
 	MSG msg;
 	while (GetMessageW(&msg, nullptr, 0, 0))
