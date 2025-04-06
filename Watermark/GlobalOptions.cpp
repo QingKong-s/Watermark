@@ -16,11 +16,11 @@ void Options::FromIni()
 	g_Options.ePos = Ini.GetKeyValue(Sec, L"Pos").GetEnumCheck(
 		PosType::Min, PosType::Max, PosType::BottomRight);
 	g_Options.dx = Ini.GetKeyValue(Sec, L"MarginX").GetInt(100);
-	g_Options.dy = Ini.GetKeyValue(Sec, L"MarginY").GetInt(40);
+	g_Options.dy = Ini.GetKeyValue(Sec, L"MarginY").GetInt(50);
 	g_Options.eTheme = Ini.GetKeyValue(Sec, L"Theme").GetEnumCheck(
 		ThemeType::Min, ThemeType::Max);
 	Ini.GetKeyValue(Sec, L"Font1").GetString(g_Options.Font1, L"Segoe UI");
-	g_Options.iPoint1 = Ini.GetKeyValue(Sec, L"Size1").GetInt(18);
+	g_Options.iPoint1 = Ini.GetKeyValue(Sec, L"Size1").GetInt(16);
 	g_Options.iWeight1 = Ini.GetKeyValue(Sec, L"Weight1").GetInt(400);
 	Ini.GetKeyValue(Sec, L"Font2").GetString(g_Options.Font2, L"Segoe UI");
 	g_Options.iPoint2 = Ini.GetKeyValue(Sec, L"Size2").GetInt(12);
@@ -28,7 +28,7 @@ void Options::FromIni()
 	g_Options.crLight = (ARGB)Ini.GetKeyValue(Sec, L"ColorLight").GetInt(0x66C4C4C4);
 	g_Options.crDark = (ARGB)Ini.GetKeyValue(Sec, L"ColorDark").GetInt(0x33888888);
 	g_Options.crCommon = (ARGB)Ini.GetKeyValue(Sec, L"ColorCommon").GetInt(0x66C4C4C4);
-	g_Options.cyPadding = Ini.GetKeyValue(Sec, L"Padding").GetInt(-2);
+	g_Options.cyPadding = Ini.GetKeyValue(Sec, L"Padding").GetInt(2);
 	Ini.GetKeyValue(Sec, L"Text1").GetString(g_Options.rsLine1, L"激活 Windows");
 	Ini.GetKeyValue(Sec, L"Text2").GetString(g_Options.rsLine2, L"转到“设置”以激活 Windows");
 }

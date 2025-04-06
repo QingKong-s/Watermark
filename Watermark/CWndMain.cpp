@@ -5,6 +5,26 @@
 void CWndMain::ClearRes()
 {
 	m_DC.Destroy();
+	if (m_pGraphics)
+	{
+		GdipDeleteGraphics(m_pGraphics);
+		m_pGraphics = nullptr;
+	}
+	if (m_pFont1)
+	{
+		GdipDeleteFont(m_pFont1);
+		m_pFont1 = nullptr;
+	}
+	if (m_pFont2)
+	{
+		GdipDeleteFont(m_pFont2);
+		m_pFont2 = nullptr;
+	}
+	if (m_pStrFmt)
+	{
+		GdipDeleteStringFormat(m_pStrFmt);
+		m_pStrFmt = nullptr;
+	}
 }
 
 LRESULT CWndMain::OnCreate(HWND hWnd, CREATESTRUCT* pcs)
@@ -30,8 +50,8 @@ void CWndMain::UpdateGraphics()
 	if (m_pGraphics)
 		GdipDeleteGraphics(m_pGraphics);
 	GdipCreateFromHDC(m_DC.GetDC(), &m_pGraphics);
-	GdipSetTextRenderingHint(m_pGraphics, Gdiplus::TextRenderingHintAntiAlias);
-	GdipSetSmoothingMode(m_pGraphics, Gdiplus::SmoothingModeHighQuality);
+	GdipSetTextRenderingHint(m_pGraphics, Gdiplus::TextRenderingHintAntiAliasGridFit);
+	GdipSetSmoothingMode(m_pGraphics, Gdiplus::SmoothingModeAntiAlias);
 	GdipGraphicsClear(m_pGraphics, 0);
 }
 
@@ -123,9 +143,12 @@ LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		}
 		break;
 	case WM_DPICHANGED:
-		m_iDpi = LOWORD(wParam);
+	{
+		m_iDpi = HIWORD(wParam);
 		eck::MsgOnDpiChanged(hWnd, lParam);
-		return 0;
+		UpdateFont();
+	}
+	break;
 	}
 	return __super::OnMsg(hWnd, uMsg, wParam, lParam);
 }
@@ -151,13 +174,13 @@ void CWndMain::UpdateFont()
 
 	GpFontFamily* pFontFamily1, * pFontFamily2;
 	GdipCreateFontFamilyFromName(g_Options.Font1.Data(), nullptr, &pFontFamily1);
-	GdipCreateFont(pFontFamily1, (float)g_Options.iPoint1, Gdiplus::FontStyleRegular,
-		Gdiplus::UnitPoint, &m_pFont1);
+	GdipCreateFont(pFontFamily1, (float)m_cyLine1,
+		Gdiplus::FontStyleRegular, Gdiplus::UnitPixel, &m_pFont1);
 	GdipDeleteFontFamily(pFontFamily1);
 
 	GdipCreateFontFamilyFromName(g_Options.Font2.Data(), nullptr, &pFontFamily2);
-	GdipCreateFont(pFontFamily2, (float)g_Options.iPoint2, Gdiplus::FontStyleRegular,
-		Gdiplus::UnitPoint, &m_pFont2);
+	GdipCreateFont(pFontFamily2, (float)m_cyLine2,
+		Gdiplus::FontStyleRegular, Gdiplus::UnitPixel, &m_pFont2);
 	GdipDeleteFontFamily(pFontFamily2);
 	UpdatePosSize();
 }

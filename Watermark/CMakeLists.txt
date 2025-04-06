@@ -16,6 +16,7 @@ target_compile_definitions(Watermark PRIVATE
 	ECK_OPT_NO_DX=1
 	ECK_OPT_NO_YYJSON=1
 	ECK_OPT_NO_PUGIXML=1
+	_CRTDBG_MAP_ALLOC
 )
 
 set_property(TARGET Watermark PROPERTY

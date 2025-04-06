@@ -8,7 +8,7 @@ private:
 
 	eck::CLabel m_LAPos{};
 	eck::CComboBoxNew m_CCBPos{};
-	
+
 	eck::CLabel m_LAPadding{};
 	eck::CEditExt m_EDPadding{};
 
@@ -63,7 +63,7 @@ private:
 	LRESULT EditArrowCtrl(HWND hWnd, UINT uMsg,
 		WPARAM wParam, LPARAM lParam, eck::SlotCtx& Ctx);
 public:
-	CWndOptions(CWndMain* pWndMain): m_pWndMain{ pWndMain } {}
+	CWndOptions(CWndMain* pWndMain) : m_pWndMain{ pWndMain } {}
 	ECK_CWND_SINGLEOWNER_NO_DEF_CONS(CWndOptions);
 	ECK_CWND_CREATE_CLS_HINST(eck::WCN_DUMMY, eck::g_hInstance);
 

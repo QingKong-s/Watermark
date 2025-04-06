@@ -47,9 +47,14 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	const auto hMon = eck::GetOwnerMonitor(nullptr);
 	const auto iDpi = eck::GetMonitorDpi(hMon);
 
-	pWnd->Create(nullptr, WS_POPUP, 
-		WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW,
-		0, 0, 10, 10, nullptr, 0);
+	const auto hGhost = CreateWindowExW(WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
+		eck::WCN_DUMMY, nullptr, WS_OVERLAPPEDWINDOW,
+		-32000, -32000, 0, 0, nullptr, nullptr, hInstance, nullptr);
+
+	pWnd->Create(nullptr, WS_POPUP,
+		WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST | WS_EX_NOACTIVATE,
+		0, 0, 10, 10, nullptr, 0);// WS_EX_TOOLWINDOW无法接收WM_DPICHANGED
+	SetWindowLongPtrW(pWnd->HWnd, GWLP_HWNDPARENT, (LONG_PTR)hGhost);
 	pWnd->UpdateFont();
 	pWnd->Show(SW_SHOWNOACTIVATE);
 
@@ -58,7 +63,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	eck::DpiScale(size, iDpi);
 	const auto pt = eck::CalcCenterWndPos(nullptr, size.cx, size.cy);
 
-	pOptWnd->Create(L"选项", WS_OVERLAPPEDWINDOW | WS_POPUP,0,
+	pOptWnd->Create(L"选项", WS_OVERLAPPEDWINDOW | WS_POPUP, 0,
 		pt.x, pt.y, size.cx, size.cy, nullptr, 0);
 
 	MSG msg;
@@ -70,6 +75,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 			DispatchMessageW(&msg);
 		}
 	}
+	DestroyWindow(hGhost);
+	delete pOptWnd;
 	delete pWnd;
 	eck::ThreadUnInit();
 	eck::UnInit();

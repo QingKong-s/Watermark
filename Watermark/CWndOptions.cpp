@@ -38,11 +38,10 @@ enum
 
 void CWndOptions::UpdateDpi()
 {
+	const auto hFont = eck::CreateDefFont(m_iDpi);
+	eck::SetFontForWndAndCtrl(HWnd, hFont);
 	DeleteObject(m_hFont);
-	m_hFont = eck::CreateDefFont(m_iDpi);
-
-	m_CPKColor.SetItemHeight(0, eck::DpiScale(20, m_iDpi));
-	m_CPKColor.SetItemHeight(eck::DpiScale(24, m_iDpi));
+	m_hFont = hFont;
 
 	const auto cxy = eck::DpiScale(BtnIcon, m_iDpi);
 	const auto hi = (HICON)LoadImageW(NtCurrentImageBaseHInst(),
@@ -244,6 +243,7 @@ void CWndOptions::ColorOptToUI()
 	const auto argb = g_Options.GetCurrColor();
 	BYTE byAlpha;
 	m_CPKColor.SetColor(eck::ARGBToColorref(argb, &byAlpha));
+	m_CPKColor.Redraw();
 	swprintf(szBuf, L"%d", (int)byAlpha);
 	m_EDColorAlpha.SetText(szBuf);
 }
@@ -440,6 +440,7 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		m_iDpi = LOWORD(wParam);
 		m_Layout.LoOnDpiChanged(m_iDpi);
 		eck::MsgOnDpiChanged(hWnd, lParam);
+		UpdateDpi();
 	}
 	break;
 	case WM_CREATE:

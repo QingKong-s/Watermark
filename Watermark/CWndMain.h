@@ -12,7 +12,6 @@ private:
 
 	GpGraphics* m_pGraphics{};
 	GpStringFormat* m_pStrFmt{};
-	GpSolidFill* m_pSolidFill{};
 
 	void ClearRes();
 
