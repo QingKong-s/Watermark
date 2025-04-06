@@ -31,14 +31,22 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	g_Options.FromIni();
 
+	const auto bAdmin = IsNTAdmin(0, nullptr);
 #ifndef _DEBUG
-	if (g_Options.bUia && IsNTAdmin(0, nullptr))
+	if (g_Options.bUia && bAdmin)
 	{
 		if (!eck::UiaIsAcquired())
 		{
 			eck::UIA uia;
-			if (NT_SUCCESS(eck::UiaTryAcquire(uia)))
+			NTSTATUS nts = eck::UiaTryAcquire(uia);
+			if (NT_SUCCESS(nts))
 				eck::UiaRestart(uia);
+			else
+			{
+				eck::CRefStrW rs{};
+				rs.Format(L"Failed to acquire UI Automation. NTSTATUS = %08X", nts);
+				eck::MsgBox(rs);
+			}
 		}
 	}
 #endif// _DEBUG
@@ -63,7 +71,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	eck::DpiScale(size, iDpi);
 	const auto pt = eck::CalcCenterWndPos(nullptr, size.cx, size.cy);
 
-	pOptWnd->Create(L"选项", WS_OVERLAPPEDWINDOW | WS_POPUP, 0,
+	pOptWnd->Create(bAdmin ? L"选项（管理员）" : L"选项",
+		WS_OVERLAPPEDWINDOW | WS_POPUP, 0,
 		pt.x, pt.y, size.cx, size.cy, nullptr, 0);
 
 	MSG msg;
