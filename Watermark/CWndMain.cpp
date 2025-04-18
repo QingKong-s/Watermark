@@ -29,6 +29,8 @@ void CWndMain::ClearRes()
 
 LRESULT CWndMain::OnCreate(HWND hWnd, CREATESTRUCT* pcs)
 {
+	BOOL b{ 1 };
+	DwmSetWindowAttribute(hWnd, DWMWA_EXCLUDED_FROM_PEEK, &b, sizeof(b));
 	eck::GetThreadCtx()->UpdateDefColor();
 	m_iDpi = eck::GetDpi(hWnd);
 
