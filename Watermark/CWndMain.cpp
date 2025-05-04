@@ -138,6 +138,7 @@ LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		eck::MsgOnSysColorChangeMainWnd(hWnd, wParam, lParam);
 		break;
 	case WM_SETTINGCHANGE:
+		eck::MsgOnSettingChangeFixDpiAwareV2(hWnd, wParam, lParam);
 		if (eck::MsgOnSettingChangeMainWnd(hWnd, wParam, lParam))
 		{
 			Paint();

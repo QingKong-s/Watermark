@@ -55,13 +55,15 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	const auto hMon = eck::GetOwnerMonitor(nullptr);
 	const auto iDpi = eck::GetMonitorDpi(hMon);
 
-	const auto hGhost = CreateWindowExW(WS_EX_TOPMOST | WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE,
+	constexpr DWORD dwCommExStyle = WS_EX_TOPMOST |
+		WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
+	const auto hGhost = CreateWindowExW(dwCommExStyle,
 		eck::WCN_DUMMY, nullptr, WS_OVERLAPPEDWINDOW,
 		-32000, -32000, 0, 0, nullptr, nullptr, hInstance, nullptr);
 
-	pWnd->Create(nullptr, WS_POPUP,
-		WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST | WS_EX_NOACTIVATE,
-		0, 0, 10, 10, nullptr, 0);// WS_EX_TOOLWINDOW无法接收WM_DPICHANGED
+	pWnd->Create(nullptr, WS_POPUP, dwCommExStyle |
+		WS_EX_LAYERED | WS_EX_TRANSPARENT,
+		0, 0, 100, 100, nullptr, 0);
 	SetWindowLongPtrW(pWnd->HWnd, GWLP_HWNDPARENT, (LONG_PTR)hGhost);
 	pWnd->UpdateFont();
 	pWnd->Show(SW_SHOWNOACTIVATE);
