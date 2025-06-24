@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "CWndMain.h"
 #include "CWndOptions.h"
-#include "GlobalOptions.h"
+#include "CApp.h"
 #include "eck\Env.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
@@ -17,10 +17,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		return 0;
 	}
 
-	eck::INITPARAM ip{};
-	ip.uFlags = eck::EIF_NOINITD2D | eck::EIF_NOINITDWRITE;
 	DWORD dwErr;
-	if (const auto iRetInit = eck::Init(hInstance, &ip, &dwErr);
+	if (const auto iRetInit = eck::Init(hInstance, nullptr, &dwErr);
 		iRetInit != eck::InitStatus::Ok)
 	{
 		EckDbgPrintFormatMessage(dwErr);
@@ -29,11 +27,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		return 0;
 	}
 
-	g_Options.FromIni();
+	App.Init();
+	App.GetOpt().FromIni();
 
 	const auto bAdmin = IsNTAdmin(0, nullptr);
 #ifndef _DEBUG
-	if (g_Options.bUia && bAdmin)
+	if (App.GetOpt().bUia && bAdmin)
 	{
 		if (!eck::UiaIsAcquired())
 		{
@@ -65,10 +64,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		WS_EX_LAYERED | WS_EX_TRANSPARENT,
 		0, 0, 100, 100, nullptr, 0);
 	SetWindowLongPtrW(pWnd->HWnd, GWLP_HWNDPARENT, (LONG_PTR)hGhost);
-	pWnd->UpdateFont();
+	SetWindowPos(pWnd->HWnd, HWND_TOPMOST, 0, 0, 0, 0,
+		SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
 	pWnd->Show(SW_SHOWNOACTIVATE);
 
-	const auto pOptWnd = new CWndOptions{ pWnd };
+	const auto pOptWnd = new CWndOptions{};
 	SIZE size = { 410, 430 };
 	eck::DpiScale(size, iDpi);
 	const auto pt = eck::CalcCenterWndPos(nullptr, size.cx, size.cy);

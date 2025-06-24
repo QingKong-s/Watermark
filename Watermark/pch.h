@@ -13,3 +13,6 @@
 #include "eck\CLinearLayout.h"
 #include "eck\CIniExt.h"
 #include "eck\ShellHelper.h"
+
+using eck::ComPtr;
+using eck::SafeRelease;

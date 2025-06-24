@@ -2,18 +2,18 @@
 set(ENV_ECK_LIB $ENV{ECK_INCLUDE})
 
 add_executable(Watermark WIN32 
-	"Watermark.cpp"
-	"pch.cpp"
-	"MyEck/MyEck.cpp"
-	"CWndMain.cpp"
-	"CWndOptions.cpp"
-	"GlobalOptions.cpp"
 	"1.manifest"
 	"Res/Resource.rc"
+	"pch.cpp"
+	"MyEck/MyEck.cpp"
+	"CApp.cpp"
+	"Watermark.cpp"
+	"CWndMain.cpp"
+	"CWndOptions.cpp"
+	"CWndDesktopText.cpp"
 )
 
 target_compile_definitions(Watermark PRIVATE
-	ECK_OPT_NO_DX=1
 	ECK_OPT_NO_YYJSON=1
 	ECK_OPT_NO_PUGIXML=1
 	_CRTDBG_MAP_ALLOC

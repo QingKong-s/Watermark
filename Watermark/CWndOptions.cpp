@@ -1,6 +1,6 @@
 ﻿#include "pch.h"
 #include "CWndOptions.h"
-#include "GlobalOptions.h"
+#include "CApp.h"
 #include "CWndMain.h"
 #include "Res/resource.h"
 
@@ -147,6 +147,7 @@ void CWndOptions::OnCreate(HWND hWnd)
 	m_EDColorAlpha.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 		0, 0, 0, 0, hWnd, 0);
 	m_EDColorAlpha.SetInputMode(eck::CEditExt::InputMode::Byte);
+	m_EDColorAlpha.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
 	m_Layout.Add(&m_EDColorAlpha, iLine, 2, Mar, eck::LF_FILL);
 
 	++iLine;
@@ -240,7 +241,7 @@ void CWndOptions::OnSize(LPARAM lParam)
 void CWndOptions::ColorOptToUI()
 {
 	WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
-	const auto argb = g_Options.GetCurrColor();
+	const auto argb = App.GetOpt().GetCurrColor();
 	BYTE byAlpha;
 	m_CPKColor.SetColor(eck::ARGBToColorref(argb, &byAlpha));
 	m_CPKColor.Redraw();
@@ -254,61 +255,69 @@ void CWndOptions::UIToColorOpt()
 	szBuf[0] = L'\0';
 	m_EDColorAlpha.GetText(szBuf, ARRAYSIZE(szBuf));
 	const auto byAlpha = (BYTE)wcstoul(szBuf, nullptr, 10);
-	g_Options.SetCurrColor(eck::ColorrefToARGB(m_CPKColor.GetColor(), byAlpha));
+	App.GetOpt().SetCurrColor(eck::ColorrefToARGB(m_CPKColor.GetColor(), byAlpha));
 }
 
 void CWndOptions::OptToUI()
 {
+	const auto& Opt = App.GetOpt();
 	WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
 	eck::FONTPICKERINFO fpki;
-	m_CBUia.SetCheckState(!!g_Options.bUia);
-	m_CBAutoRun.SetCheckState(!!g_Options.bAutoRun);
-	m_CCBPos.GetListBox().SetCurrSel((int)g_Options.ePos);
-	swprintf(szBuf, L"%d", g_Options.cyPadding);
+	m_CBUia.SetCheckState(!!Opt.bUia);
+	m_CBAutoRun.SetCheckState(!!Opt.bAutoRun);
+	m_CCBPos.GetListBox().SetCurrSel((int)Opt.ePos);
+	swprintf(szBuf, L"%d", Opt.cyPadding);
 	m_EDPadding.SetText(szBuf);
-	swprintf(szBuf, L"%d", g_Options.dx);
+	swprintf(szBuf, L"%d", Opt.dx);
 	m_EDDx.SetText(szBuf);
-	swprintf(szBuf, L"%d", g_Options.dy);
+	swprintf(szBuf, L"%d", Opt.dy);
 	m_EDDy.SetText(szBuf);
-	m_CCBTheme.GetListBox().SetCurrSel((int)g_Options.eTheme);
-	fpki.pszFontName = g_Options.Font1.Data();
-	fpki.iPointSize = g_Options.iPoint1;
-	fpki.iWeight = g_Options.iWeight1;
+	m_CCBTheme.GetListBox().SetCurrSel((int)Opt.eTheme);
+	fpki.pszFontName = Opt.Font1.Data();
+	fpki.iPointSize = Opt.iPoint1;
+	fpki.iWeight = Opt.iWeight1;
 	m_FPKFont1.FromInfo(fpki);
-	fpki.pszFontName = g_Options.Font2.Data();
-	fpki.iPointSize = g_Options.iPoint2;
-	fpki.iWeight = g_Options.iWeight2;
+	fpki.pszFontName = Opt.Font2.Data();
+	fpki.iPointSize = Opt.iPoint2;
+	fpki.iWeight = Opt.iWeight2;
 	m_FPKFont2.FromInfo(fpki);
-	m_EDLine1.SetText(g_Options.rsLine1.Data());
-	m_EDLine2.SetText(g_Options.rsLine2.Data());
+	m_EDLine1.SetText(Opt.rsLine1.Data());
+	m_EDLine2.SetText(Opt.rsLine2.Data());
 	ColorOptToUI();
 }
 
 void CWndOptions::UIToOpt()
 {
-	g_Options.bUia = !!m_CBUia.GetCheckState();
-	g_Options.bAutoRun = !!m_CBAutoRun.GetCheckState();
-	g_Options.ePos = (PosType)m_CCBPos.GetListBox().GetCurrSel();
+	auto& Opt = App.GetOpt();
+	Opt.bUia = !!m_CBUia.GetCheckState();
+	Opt.bAutoRun = !!m_CBAutoRun.GetCheckState();
+	Opt.ePos = (PosType)m_CCBPos.GetListBox().GetCurrSel();
 	WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
 	m_EDPadding.GetText(szBuf, ARRAYSIZE(szBuf));
-	g_Options.cyPadding = (int)_wtoi(szBuf);
+	Opt.cyPadding = (int)_wtoi(szBuf);
 	m_EDDx.GetText(szBuf, ARRAYSIZE(szBuf));
-	g_Options.dx = (int)_wtoi(szBuf);
+	Opt.dx = (int)_wtoi(szBuf);
 	m_EDDy.GetText(szBuf, ARRAYSIZE(szBuf));
-	g_Options.dy = (int)_wtoi(szBuf);
-	g_Options.eTheme = (ThemeType)m_CCBTheme.GetListBox().GetCurrSel();
+	Opt.dy = (int)_wtoi(szBuf);
+	Opt.eTheme = (ThemeType)m_CCBTheme.GetListBox().GetCurrSel();
 	eck::FONTPICKERINFO fpki;
-	g_Options.Font1 = m_FPKFont1.ToInfo(fpki);
-	g_Options.iPoint1 = fpki.iPointSize;
-	g_Options.iWeight1 = fpki.iWeight;
-	g_Options.Font2 = m_FPKFont2.ToInfo(fpki);
-	g_Options.iPoint2 = fpki.iPointSize;
-	g_Options.iWeight2 = fpki.iWeight;
-	g_Options.rsLine1 = m_EDLine1.GetText();
-	g_Options.rsLine2 = m_EDLine2.GetText();
+	Opt.Font1 = m_FPKFont1.ToInfo(fpki);
+	Opt.iPoint1 = fpki.iPointSize;
+	Opt.iWeight1 = fpki.iWeight;
+	Opt.Font2 = m_FPKFont2.ToInfo(fpki);
+	Opt.iPoint2 = fpki.iPointSize;
+	Opt.iWeight2 = fpki.iWeight;
+	Opt.rsLine1 = m_EDLine1.GetText();
+	Opt.rsLine2 = m_EDLine2.GetText();
 	UIToColorOpt();
 
-	g_Options.ToIni();
+	Opt.ToIni();
+}
+
+void CWndOptions::ColorUpdated()
+{
+	UIToColorOpt();
+	App.GetSignal().Emit({ ANF_MA_UPDATE_COLOR });
 }
 
 LRESULT CWndOptions::EditArrowCtrl(HWND hWnd, UINT uMsg,
@@ -331,19 +340,21 @@ LRESULT CWndOptions::EditArrowCtrl(HWND hWnd, UINT uMsg,
 			SetWindowTextW(hWnd, szBuf);
 			if (hWnd == m_EDPadding.HWnd)
 			{
-				g_Options.cyPadding = iVal;
-				m_pWndMain->UpdateFont();
+				App.GetOpt().cyPadding = iVal;
+				App.GetSignal().Emit({ ANF_MA_UPDATE_PADDING });
 			}
 			else if (hWnd == m_EDDx.HWnd)
 			{
-				g_Options.dx = iVal;
-				m_pWndMain->UpdatePos();
+				App.GetOpt().dx = iVal;
+				App.GetSignal().Emit({ ANF_MA_UPDATE_POS });
 			}
 			else if (hWnd == m_EDDy.HWnd)
 			{
-				g_Options.dy = iVal;
-				m_pWndMain->UpdatePos();
+				App.GetOpt().dy = iVal;
+				App.GetSignal().Emit({ ANF_MA_UPDATE_POS });
 			}
+			else if (hWnd == m_EDColorAlpha.HWnd)
+				ColorUpdated();
 			return 0;
 		}
 	}
@@ -380,9 +391,9 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 			case eck::NM_LBN_ITEMCHANGED:
 			{
-				g_Options.eTheme = (ThemeType)m_CCBTheme.GetListBox().GetCurrSel();
+				App.GetOpt().eTheme = (ThemeType)m_CCBTheme.GetListBox().GetCurrSel();
 				ColorOptToUI();
-				if (g_Options.eTheme == ThemeType::Auto)
+				if (App.GetOpt().eTheme == ThemeType::Auto)
 				{
 					EnableWindow(m_CPKColor.HWnd, FALSE);
 					EnableWindow(m_EDColorAlpha.HWnd, FALSE);
@@ -394,6 +405,13 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 				}
 			}
 			return 0;
+			}
+		else if (pnmhdr->hwndFrom == m_CPKColor.HWnd)
+			switch (pnmhdr->code)
+			{
+			case eck::NM_CLP_CLRCHANGED:
+				ColorUpdated();
+				return 0;
 			}
 	}
 	break;
@@ -415,7 +433,7 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			else if (lParam == (LPARAM)m_BTSave.HWnd)
 			{
 				UIToOpt();
-				m_pWndMain->UpdateFont();
+				App.GetSignal().Emit({ ANF_MA_REFRESH });
 				return 0;
 			}
 			else if (lParam == (LPARAM)m_CBAutoRun.HWnd)
@@ -479,7 +497,7 @@ void CWndOptions::OnTrayNotify(UINT uMsg, UINT uID, int x, int y)
 		m_bExitMsgBox = TRUE;
 		if (MessageBoxW(HWnd, L"确定要退出吗？", L"退出", MB_YESNO | MB_ICONQUESTION) == IDYES)
 		{
-			m_pWndMain->Destroy();
+			App.GetSignal().Emit({ ANF_EXIT });
 			Destroy();
 			PostQuitMessage(0);
 		}

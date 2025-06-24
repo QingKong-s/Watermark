@@ -41,8 +41,6 @@ private:
 	eck::CTableLayout m_Layout{};
 	eck::CLinearLayoutH m_LytBtn{};
 
-	CWndMain* m_pWndMain{};
-
 	HFONT m_hFont{};
 	int m_iDpi{ USER_DEFAULT_SCREEN_DPI };
 	BOOL m_bExitMsgBox{};
@@ -60,11 +58,12 @@ private:
 	void OptToUI();
 	void UIToOpt();
 
+	void ColorUpdated();
+
 	LRESULT EditArrowCtrl(HWND hWnd, UINT uMsg,
 		WPARAM wParam, LPARAM lParam, eck::SlotCtx& Ctx);
 public:
-	CWndOptions(CWndMain* pWndMain) : m_pWndMain{ pWndMain } {}
-	ECK_CWND_SINGLEOWNER_NO_DEF_CONS(CWndOptions);
+	ECK_CWND_SINGLEOWNER(CWndOptions);
 	ECK_CWND_CREATE_CLS_HINST(eck::WCN_DUMMY, eck::g_hInstance);
 
 	BOOL PreTranslateMessage(const MSG& Msg) override;
