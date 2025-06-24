@@ -13,6 +13,10 @@
 #include "eck\CLinearLayout.h"
 #include "eck\CIniExt.h"
 #include "eck\ShellHelper.h"
+#include "eck\CRegKey.h"
+
+#define SECURITY_WIN32 1
+#include <security.h>
 
 using eck::ComPtr;
 using eck::SafeRelease;

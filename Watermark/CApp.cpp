@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "CApp.h"
+#include "Utils.h"
 
 CApp App{};
 
@@ -35,10 +36,10 @@ void Options::FromIni()
 	Ini.GetKeyValue(Sec, L"DtFont").GetString(rsDtFont, L"Segoe UI");
 	iDtPoint = Ini.GetKeyValue(Sec, L"DtSize").GetInt(10);
 	iDtWeight = Ini.GetKeyValue(Sec, L"DtWeight").GetInt(400);
-	crDtText = (ARGB)Ini.GetKeyValue(Sec, L"DtColor").GetInt(0xFFFFFFFF);
-	Ini.GetKeyValue(Sec, L"DtText").GetString(rsDtText, LR"(Test Mode
-Windows 11 Pro
-Build 22631.ni_release.240106-1100)");
+	crDtText = (ARGB)Ini.GetKeyValue(Sec, L"DtColor").GetInt(0xFFF0F0F0);
+	Ini.GetKeyValue(Sec, L"DtText").GetString(rsDtText, LR"(%OSCaption%
+评估副本。 %Reg.BuildLabEx%)");
+	ParseDesktopText();
 	dxDt = Ini.GetKeyValue(Sec, L"DtMarginX").GetInt(5);
 	dyDt = Ini.GetKeyValue(Sec, L"DtMarginY").GetInt(2);
 }
@@ -109,6 +110,12 @@ void Options::SetCurrColor(ARGB cr)
 	case ThemeType::Common: crCommon = cr;	break;
 	default: break;
 	}
+}
+
+void Options::ParseDesktopText()
+{
+	rsDtTextParsed.Clear();
+	::ParseDesktopText(rsDtText.Data(), rsDtTextParsed);
 }
 
 void CApp::Init()

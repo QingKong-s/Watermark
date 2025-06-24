@@ -35,8 +35,8 @@ void CWndDesktopText::ReCreateDWriteResources()
 	m_pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	m_pTextFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 
-	eck::g_pDwFactory->CreateTextLayout(Opt.rsDtText.Data(), Opt.rsDtText.Size(),
-		m_pTextFormat.Get(),
+	eck::g_pDwFactory->CreateTextLayout(Opt.rsDtTextParsed.Data(),
+		Opt.rsDtTextParsed.Size(), m_pTextFormat.Get(),
 		float(m_rcMonitorWork.right - m_rcMonitorWork.left),
 		float(m_rcMonitorWork.bottom - m_rcMonitorWork.top),
 		m_pTextLayout.AddrOfClear());
@@ -63,19 +63,35 @@ void CWndDesktopText::ReCreateMemoryDC()
 	m_pRenderTarget->BindDC(m_DC.GetDC(), &rcSub);
 }
 
+void CWndDesktopText::CalcWindowPosition(int cx, int cy, int& x, int& y)
+{
+	DWRITE_TEXT_METRICS tm;
+	m_pTextLayout->GetMetrics(&tm);
+	x = m_rcMonitorWork.right - eck::DpiScale(App.GetOpt().dxDt, m_iDpi)
+		- (int)ceilf(tm.width - eck::DpiScaleF(1.f, m_iDpi));
+	y = m_rcMonitorWork.bottom - eck::DpiScale(App.GetOpt().dyDt, m_iDpi)
+		- (int)ceilf(tm.height - eck::DpiScaleF(1.f, m_iDpi));
+}
+
 void CWndDesktopText::UpdatePosSize()
 {
 	DWRITE_TEXT_METRICS tm;
 	m_pTextLayout->GetMetrics(&tm);
-	SetWindowPos(HWnd, nullptr,
-		m_rcMonitorWork.right - eck::DpiScale(App.GetOpt().dxDt, m_iDpi)
-		- (int)ceilf(tm.width - eck::DpiScaleF(1.f, m_iDpi)),
-		m_rcMonitorWork.bottom - eck::DpiScale(App.GetOpt().dyDt, m_iDpi)
-		- (int)ceilf(tm.height - eck::DpiScaleF(1.f, m_iDpi)),
-		(int)ceilf(tm.width),
-		(int)ceilf(tm.height),
+	const auto cx = (int)ceilf(tm.width);
+	const auto cy = (int)ceilf(tm.height);
+	int x, y;
+	CalcWindowPosition(cx, cy, x, y);
+	SetWindowPos(HWnd, nullptr, x, y, cx, cy,
 		SWP_NOZORDER | SWP_NOACTIVATE);
 	Paint();
+}
+
+void CWndDesktopText::UpdatePos()
+{
+	int x, y;
+	CalcWindowPosition(m_cxClient, m_cyClient, x, y);
+	SetWindowPos(HWnd, nullptr, x, y, 0, 0,
+		SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
 void CWndDesktopText::OnAppEvent(const APP_NOTIFY& n)
@@ -98,23 +114,48 @@ void CWndDesktopText::SetOwnerProgman()
 		SetWindowLongPtrW(HWnd, GWLP_HWNDPARENT, 0);
 }
 
+void CWndDesktopText::UpdateMonitorInfo()
+{
+	const auto hMon = MonitorFromWindow(HWnd, MONITOR_DEFAULTTONEAREST);
+	MONITORINFO mi;
+	mi.cbSize = sizeof(mi);
+	GetMonitorInfoW(hMon, &mi);
+	m_rcMonitorWork = mi.rcWork;
+}
+
 LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	if (uMsg == s_uMsgTaskbarCreated)
 	{
-
+		SetOwnerProgman();
+		UpdatePos();
 		return 0;
 	}
 
 	switch (uMsg)
 	{
+	case WM_SETTINGCHANGE:
+	{
+		if ((lParam && eck::TcsEqual((PCWSTR)lParam, L"TraySettings")) ||
+			wParam == SPI_SETWORKAREA)
+		{
+			UpdateMonitorInfo();
+			UpdatePos();
+		}
+		eck::MsgOnSettingChangeFixDpiAwareV2(hWnd, wParam, lParam);
+	}
+	break;
+
+	case WM_DPICHANGED:
+		UpdateMonitorInfo();
+		m_iDpi = HIWORD(wParam);
+		ReCreateDWriteResources();
+		UpdatePosSize();
+		break;
+
 	case WM_CREATE:
 	{
-		const auto hMon = MonitorFromWindow(HWnd, MONITOR_DEFAULTTONEAREST);
-		MONITORINFO mi;
-		mi.cbSize = sizeof(mi);
-		GetMonitorInfoW(hMon, &mi);
-		m_rcMonitorWork = mi.rcWork;
+		UpdateMonitorInfo();
 
 		constexpr BOOL b{ 1 };
 		DwmSetWindowAttribute(hWnd, DWMWA_EXCLUDED_FROM_PEEK, &b, sizeof(b));
@@ -134,6 +175,8 @@ LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	case WM_SIZE:
 	{
 		ECK_GET_SIZE_LPARAM(m_cxClient, m_cyClient, lParam);
+		m_cxClient = std::max(m_cxClient, 1);
+		m_cyClient = std::max(m_cyClient, 1);
 		ReCreateMemoryDC();
 	}
 	return 0;

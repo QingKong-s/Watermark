@@ -48,11 +48,14 @@ struct Options
 	int dxDt{};
 	int dyDt{};
 	eck::CRefStrW rsDtText{};
+	eck::CRefStrW rsDtTextParsed{};// 不保存
 
 	void FromIni();
 	void ToIni();
 	ARGB GetCurrColor() const;
 	void SetCurrColor(ARGB cr);
+
+	void ParseDesktopText();
 };
 
 enum : UINT

@@ -164,12 +164,10 @@ LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			Paint();
 		break;
 	case WM_DPICHANGED:
-	{
 		m_iDpi = HIWORD(wParam);
 		ReCreateDWriteResources();
 		UpdatePosSize();
-	}
-	break;
+		break;
 	}
 	return __super::OnMsg(hWnd, uMsg, wParam, lParam);
 }

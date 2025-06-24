@@ -4,6 +4,8 @@
 #include "CWndOptions.h"
 #include "eck\Env.h"
 
+#pragma comment(lib, "Secur32.lib")
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
 	_In_ PWSTR pszCmdLine, _In_ int nCmdShow)
 {
@@ -67,8 +69,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	SetWindowLongPtrW(pWnd->HWnd, GWLP_HWNDPARENT, (LONG_PTR)hGhost);
 	pWnd->Show(SW_SHOWNOACTIVATE);
 
-	pWndDt->Create(L"AAAAAAAAAAAAAAAAAAAAAAAAA", WS_POPUP, WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE |
-		WS_EX_LAYERED | WS_EX_TRANSPARENT, 0, 0, 100, 100, nullptr, 0);
+	pWndDt->Create(nullptr, WS_POPUP, WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE |
+		WS_EX_LAYERED | WS_EX_TRANSPARENT, 0, 0, 1, 1, nullptr, 0);
 	pWndDt->Show(SW_SHOWNOACTIVATE);
 
 	const auto pOptWnd = new CWndOptions{};

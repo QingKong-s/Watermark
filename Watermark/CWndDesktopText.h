@@ -16,6 +16,8 @@ private:
 
 	RECT m_rcMonitorWork{};
 
+	void CalcWindowPosition(int cx, int cy, int& x, int& y);
+
 	void UpdatePosSize();
 
 	void Paint();
@@ -31,6 +33,8 @@ private:
 	void OnAppEvent(const APP_NOTIFY& n);
 
 	void SetOwnerProgman();
+
+	void UpdateMonitorInfo();
 public:
 	ECK_CWND_SINGLEOWNER_NO_DEF_CONS(CWndDesktopText);
 	ECK_CWND_CREATE_CLS_HINST(eck::WCN_DUMMY, eck::g_hInstance);
