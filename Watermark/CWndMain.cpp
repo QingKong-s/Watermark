@@ -28,7 +28,7 @@ void CWndMain::Paint()
 	
 	m_pBrush->SetColor(eck::ARGBToD2dColorF(App.GetOpt().GetCurrColor()));
 	pRt->BeginDraw();
-	pRt->Clear({.r=1.,.a = 0.0});
+	pRt->Clear({});
 	D2D1_POINT_2F pt{};
 	pRt->DrawTextLayout(pt, m_pTextLayout1.Get(), m_pBrush.Get(),
 		D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
@@ -36,15 +36,12 @@ void CWndMain::Paint()
 	pRt->DrawTextLayout(pt, m_pTextLayout2.Get(), m_pBrush.Get(),
 		D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
 	pRt->EndDraw();
-}
 
-void CWndMain::UpdateLayered()
-{
 	SIZE size{ m_cxClient, m_cyClient };
-	POINT pt{};
+	POINT pt1{};
 	BLENDFUNCTION bf{ AC_SRC_OVER,0,255,AC_SRC_ALPHA };
 	UpdateLayeredWindow(HWnd, nullptr, nullptr, &size,
-		m_DC.GetDC(), &pt, 0, &bf, ULW_ALPHA);
+		m_DC.GetDC(), &pt1, 0, &bf, ULW_ALPHA);
 }
 
 void CWndMain::CalcWindowPosition(int cx, int cy, int& x, int& y)
@@ -136,10 +133,7 @@ void CWndMain::OnAppEvent(const APP_NOTIFY& n)
 	else if (n.uFlags & ANF_MA_UPDATE_POS)
 		UpdatePos();
 	else if (n.uFlags & ANF_MA_UPDATE_COLOR)
-	{
 		Paint();
-		UpdateLayered();
-	}
 }
 
 LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -167,10 +161,7 @@ LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_SETTINGCHANGE:
 		eck::MsgOnSettingChangeFixDpiAwareV2(hWnd, wParam, lParam);
 		if (eck::MsgOnSettingChangeMainWnd(hWnd, wParam, lParam))
-		{
 			Paint();
-			UpdateLayered();
-		}
 		break;
 	case WM_DPICHANGED:
 	{
@@ -213,5 +204,4 @@ void CWndMain::UpdatePosSize()
 	SetWindowPos(HWnd, nullptr, x, y, std::max(cx, 1), std::max(cy, 1),
 		SWP_NOZORDER | SWP_NOACTIVATE);
 	Paint();
-	UpdateLayered();
 }

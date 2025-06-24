@@ -1,7 +1,7 @@
 ﻿#include "pch.h"
 #include "CWndMain.h"
+#include "CWndDesktopText.h"
 #include "CWndOptions.h"
-#include "CApp.h"
 #include "eck\Env.h"
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance,
@@ -50,6 +50,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	}
 #endif// _DEBUG
 
+	const auto pWndDt = new CWndDesktopText{};
 	const auto pWnd = new CWndMain{};
 	const auto hMon = eck::GetOwnerMonitor(nullptr);
 	const auto iDpi = eck::GetMonitorDpi(hMon);
@@ -64,9 +65,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		WS_EX_LAYERED | WS_EX_TRANSPARENT,
 		0, 0, 100, 100, nullptr, 0);
 	SetWindowLongPtrW(pWnd->HWnd, GWLP_HWNDPARENT, (LONG_PTR)hGhost);
-	SetWindowPos(pWnd->HWnd, HWND_TOPMOST, 0, 0, 0, 0,
-		SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE | SWP_NOOWNERZORDER);
 	pWnd->Show(SW_SHOWNOACTIVATE);
+
+	pWndDt->Create(L"AAAAAAAAAAAAAAAAAAAAAAAAA", WS_POPUP, WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE |
+		WS_EX_LAYERED | WS_EX_TRANSPARENT, 0, 0, 100, 100, nullptr, 0);
+	pWndDt->Show(SW_SHOWNOACTIVATE);
 
 	const auto pOptWnd = new CWndOptions{};
 	SIZE size = { 410, 430 };
@@ -89,6 +92,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	DestroyWindow(hGhost);
 	delete pOptWnd;
 	delete pWnd;
+	delete pWndDt;
 	eck::ThreadUnInit();
 	eck::UnInit();
 	CoUninitialize();

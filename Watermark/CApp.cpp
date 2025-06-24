@@ -20,16 +20,27 @@ void Options::FromIni()
 		ThemeType::Min, ThemeType::Max);
 	Ini.GetKeyValue(Sec, L"Font1").GetString(Font1, L"Segoe UI");
 	iPoint1 = Ini.GetKeyValue(Sec, L"Size1").GetInt(16);
-	iWeight1 = Ini.GetKeyValue(Sec, L"Weight1").GetInt(400);
+	iWeight1 = Ini.GetKeyValue(Sec, L"Weight1").GetInt(340);
 	Ini.GetKeyValue(Sec, L"Font2").GetString(Font2, L"Segoe UI");
 	iPoint2 = Ini.GetKeyValue(Sec, L"Size2").GetInt(12);
-	iWeight2 = Ini.GetKeyValue(Sec, L"Weight2").GetInt(400);
+	iWeight2 = Ini.GetKeyValue(Sec, L"Weight2").GetInt(340);
 	crLight = (ARGB)Ini.GetKeyValue(Sec, L"ColorLight").GetInt(0x66C4C4C4);
 	crDark = (ARGB)Ini.GetKeyValue(Sec, L"ColorDark").GetInt(0x33888888);
 	crCommon = (ARGB)Ini.GetKeyValue(Sec, L"ColorCommon").GetInt(0x66C4C4C4);
 	cyPadding = Ini.GetKeyValue(Sec, L"Padding").GetInt(2);
 	Ini.GetKeyValue(Sec, L"Text1").GetString(rsLine1, L"激活 Windows");
 	Ini.GetKeyValue(Sec, L"Text2").GetString(rsLine2, L"转到“设置”以激活 Windows");
+
+	Sec = Ini.GetSection(L"DesktopWatermark");
+	Ini.GetKeyValue(Sec, L"DtFont").GetString(rsDtFont, L"Segoe UI");
+	iDtPoint = Ini.GetKeyValue(Sec, L"DtSize").GetInt(10);
+	iDtWeight = Ini.GetKeyValue(Sec, L"DtWeight").GetInt(400);
+	crDtText = (ARGB)Ini.GetKeyValue(Sec, L"DtColor").GetInt(0xFFFFFFFF);
+	Ini.GetKeyValue(Sec, L"DtText").GetString(rsDtText, LR"(Test Mode
+Windows 11 Pro
+Build 22631.ni_release.240106-1100)");
+	dxDt = Ini.GetKeyValue(Sec, L"DtMarginX").GetInt(5);
+	dyDt = Ini.GetKeyValue(Sec, L"DtMarginY").GetInt(2);
 }
 
 void Options::ToIni()

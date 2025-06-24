@@ -27,8 +27,6 @@ private:
 
 	void Paint();
 
-	void UpdateLayered();
-
 	void CalcWindowPosition(int cx, int cy, int& x, int& y);
 
 	// 重新创建内存DC和Dw渲染目标

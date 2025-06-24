@@ -41,6 +41,14 @@ struct Options
 	eck::CRefStrW rsLine1{};// 首行文本
 	eck::CRefStrW rsLine2{};// 次行文本
 
+	eck::CRefStrW rsDtFont{};
+	int iDtPoint{};
+	int iDtWeight{};
+	ARGB crDtText{};
+	int dxDt{};
+	int dyDt{};
+	eck::CRefStrW rsDtText{};
+
 	void FromIni();
 	void ToIni();
 	ARGB GetCurrColor() const;
