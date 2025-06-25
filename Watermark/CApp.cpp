@@ -31,27 +31,33 @@ void Options::FromIni()
 	cyPadding = Ini.GetKeyValue(Sec, L"Padding").GetInt(2);
 	Ini.GetKeyValue(Sec, L"Text1").GetString(rsLine1, L"激活 Windows");
 	Ini.GetKeyValue(Sec, L"Text2").GetString(rsLine2, L"转到“设置”以激活 Windows");
+	bColorFont = Ini.GetKeyValue(Sec, L"ColorFont").GetBool(TRUE);
 
 	Sec = Ini.GetSection(L"DesktopWatermark");
 	Ini.GetKeyValue(Sec, L"DtFont").GetString(rsDtFont, L"Segoe UI");
 	iDtPoint = Ini.GetKeyValue(Sec, L"DtSize").GetInt(10);
 	iDtWeight = Ini.GetKeyValue(Sec, L"DtWeight").GetInt(400);
-	crDtText = (ARGB)Ini.GetKeyValue(Sec, L"DtColor").GetInt(0xFFF0F0F0);
+	crDtText = (ARGB)Ini.GetKeyValue(Sec, L"DtColor").GetInt(0xFFFFFFFF);
 	Ini.GetKeyValue(Sec, L"DtText").GetString(rsDtText, LR"(%OSCaption%
-评估副本。 %Reg.BuildLabEx%
+评估副本。⚠️ %Reg.BuildLabEx%
 %Reg.SystemRoot%)");
 	ParseDesktopText();
 	dxDt = Ini.GetKeyValue(Sec, L"DtMarginX").GetInt(5);
 	dyDt = Ini.GetKeyValue(Sec, L"DtMarginY").GetInt(2);
 	eDtPos = Ini.GetKeyValue(Sec, L"DtPos").GetEnumCheck(
 		PosType::Min, PosType::Max, PosType::BottomRight);
+	bDtShadow = Ini.GetKeyValue(Sec, L"DtShadow").GetBool(TRUE);
+	fDtShadowRadius = (float)Ini.GetKeyValue(Sec, L"DtShadowRadius").GetDouble(1.0f);
+	fDtShadowExtent = (float)Ini.GetKeyValue(Sec, L"DtShadowExtent").GetDouble(1.0f);
+	crDtShadow = (ARGB)Ini.GetKeyValue(Sec, L"DtShadowColor").GetInt(0xFF000000);
+	bDtColorFont = Ini.GetKeyValue(Sec, L"DtColorFont").GetBool(TRUE);
 }
 
 void Options::ToIni()
 {
+	eck::CRefStrW rs{};
 	eck::CIniExtMut Ini{};
 	auto Sec = Ini.CreateSection(L"Watermark");
-	eck::CRefStrW rs{};
 	rs.Format(L"%d", bUia);
 	Ini.CreateKeyValue(Sec, L"UIAccess", rs.ToStringView());
 	rs.Format(L"%d", bAutoRun);
@@ -84,6 +90,35 @@ void Options::ToIni()
 	Ini.CreateKeyValue(Sec, L"Padding", rs.ToStringView());
 	Ini.CreateKeyValue(Sec, L"Text1", rsLine1.ToStringView());
 	Ini.CreateKeyValue(Sec, L"Text2", rsLine2.ToStringView());
+	rs.Format(L"%d", bColorFont);
+	Ini.CreateKeyValue(Sec, L"ColorFont", rs.ToStringView());
+
+	Sec = Ini.CreateSection(L"DesktopWatermark");
+	Ini.CreateKeyValue(Sec, L"DtFont", rsDtFont.ToStringView());
+	rs.Format(L"%d", iDtPoint);
+	Ini.CreateKeyValue(Sec, L"DtSize", rs.ToStringView());
+	rs.Format(L"%d", iDtWeight);
+	Ini.CreateKeyValue(Sec, L"DtWeight", rs.ToStringView());
+	rs.Format(L"%d", crDtText);
+	Ini.CreateKeyValue(Sec, L"DtColor", rs.ToStringView());
+	Ini.CreateKeyValue(Sec, L"DtText", rsDtText.ToStringView());
+	rs.Format(L"%d", dxDt);
+	Ini.CreateKeyValue(Sec, L"DtMarginX", rs.ToStringView());
+	rs.Format(L"%d", dyDt);
+	Ini.CreateKeyValue(Sec, L"DtMarginY", rs.ToStringView());
+	rs.Format(L"%d", eDtPos);
+	Ini.CreateKeyValue(Sec, L"DtPos", rs.ToStringView());
+	rs.Format(L"%d", bDtShadow);
+	Ini.CreateKeyValue(Sec, L"DtShadow", rs.ToStringView());
+	rs.Format(L"%.2f", fDtShadowRadius);
+	Ini.CreateKeyValue(Sec, L"DtShadowRadius", rs.ToStringView());
+	rs.Format(L"%.2f", fDtShadowExtent);
+	Ini.CreateKeyValue(Sec, L"DtShadowExtent", rs.ToStringView());
+	rs.Format(L"%d", crDtShadow);
+	Ini.CreateKeyValue(Sec, L"DtShadowColor", rs.ToStringView());
+	rs.Format(L"%d", bDtColorFont);
+	Ini.CreateKeyValue(Sec, L"DtColorFont", rs.ToStringView());
+
 
 	rs.Clear();
 	Ini.Save(rs);

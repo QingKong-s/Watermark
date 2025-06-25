@@ -5,16 +5,53 @@ const static UINT s_uMsgTaskbarCreated = RegisterWindowMessageW(L"TaskbarCreated
 
 void CWndDesktopText::Paint()
 {
-	const auto pRt = m_pRenderTarget.Get();
-
-	m_pBrush->SetColor(eck::ARGBToD2dColorF(App.GetOpt().crDtText));
-	pRt->BeginDraw();
-	pRt->Clear({});
 	DWRITE_TEXT_METRICS tm;
 	m_pTextLayout->GetMetrics(&tm);
-	pRt->DrawTextLayout({ -tm.left,0 }, m_pTextLayout.Get(), m_pBrush.Get(),
-		D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
-	pRt->EndDraw();
+	const auto bShadow = App.GetOpt().bDtShadow;
+	const auto pDC = m_pDeviceContext.Get();
+	ComPtr<ID2D1Effect> pFx;
+	if (bShadow)
+	{
+		ComPtr<ID2D1BitmapRenderTarget> pBitmapRt;
+		pDC->CreateCompatibleRenderTarget(&pBitmapRt);
+
+		m_pBrush->SetColor(eck::ARGBToD2dColorF(App.GetOpt().crDtShadow));
+		pBitmapRt->BeginDraw();
+		pBitmapRt->Clear({});
+		ComPtr<ID2D1PathGeometry1> pPathGeometry;
+		eck::GetTextLayoutPathGeometry(m_pTextLayout.Get(), pDC,
+			-tm.left + m_cxyShadowExtent, 0, pPathGeometry.RefOf());
+		ComPtr<ID2D1PathGeometry1> pPathGeometryWidened;
+		eck::g_pD2dFactory->CreatePathGeometry(&pPathGeometryWidened);
+		ComPtr<ID2D1GeometrySink> pSink;
+		pPathGeometryWidened->Open(&pSink);
+		pPathGeometry->Widen(eck::DpiScaleF(App.GetOpt().fDtShadowExtent, m_iDpi),
+			nullptr, nullptr, 0.1f, pSink.Get());
+		pSink->Close();
+		pBitmapRt->FillGeometry(pPathGeometryWidened.Get(), m_pBrush.Get());
+		pBitmapRt->EndDraw();
+
+		ComPtr<ID2D1Bitmap> pBitmap;
+		pBitmapRt->GetBitmap(&pBitmap);
+		pDC->CreateEffect(CLSID_D2D1GaussianBlur, &pFx);
+		pFx->SetInput(0, pBitmap.Get());
+		pFx->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION,
+			eck::DpiScaleF(App.GetOpt().fDtShadowRadius, m_iDpi));
+		pFx->SetValue(D2D1_GAUSSIANBLUR_PROP_OPTIMIZATION,
+			D2D1_GAUSSIANBLUR_OPTIMIZATION_BALANCED);
+		pFx->SetValue(D2D1_GAUSSIANBLUR_PROP_BORDER_MODE, D2D1_BORDER_MODE_HARD);
+	}
+
+	m_pBrush->SetColor(eck::ARGBToD2dColorF(App.GetOpt().crDtText));
+	pDC->BeginDraw();
+	if (bShadow)
+		pDC->DrawImage(pFx.Get(), D2D1_INTERPOLATION_MODE_LINEAR,
+			D2D1_COMPOSITE_MODE_SOURCE_COPY);
+	else
+		pDC->Clear({});
+	pDC->DrawTextLayout({ -tm.left + m_cxyShadowExtent,0 }, m_pTextLayout.Get(),
+		m_pBrush.Get(), App.GetOpt().GetDtDtlFlags());
+	pDC->EndDraw();
 
 	SIZE size{ m_cxClient,m_cyClient };
 	POINT pt1{};
@@ -64,6 +101,7 @@ void CWndDesktopText::ReCreateMemoryDC()
 	m_pRenderTarget->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
 	const RECT rcSub{ 0,0,m_cxClient, m_cyClient };
 	m_pRenderTarget->BindDC(m_DC.GetDC(), &rcSub);
+	m_pRenderTarget.As(m_pDeviceContext);
 }
 
 void CWndDesktopText::CalcWindowPosition(int cx, int cy, int& x, int& y)
@@ -102,7 +140,8 @@ void CWndDesktopText::UpdatePosSize()
 	const auto cy = (int)ceilf(tm.height);
 	int x, y;
 	CalcWindowPosition(cx, cy, x, y);
-	SetWindowPos(HWnd, nullptr, x, y, cx, cy,
+	SetWindowPos(HWnd, nullptr, x - m_cxyShadowExtent, y - m_cxyShadowExtent,
+		cx + m_cxyShadowExtent * 2, cy + m_cxyShadowExtent * 2,
 		SWP_NOZORDER | SWP_NOACTIVATE);
 	Paint();
 }
@@ -111,7 +150,7 @@ void CWndDesktopText::UpdatePos()
 {
 	int x, y;
 	CalcWindowPosition(m_cxClient, m_cyClient, x, y);
-	SetWindowPos(HWnd, nullptr, x, y, 0, 0,
+	SetWindowPos(HWnd, nullptr, x - m_cxyShadowExtent, y - m_cxyShadowExtent, 0, 0,
 		SWP_NOSIZE | SWP_NOZORDER | SWP_NOACTIVATE);
 }
 
@@ -174,12 +213,16 @@ LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 	case WM_CREATE:
 	{
+		constexpr BOOL b{ 1 };
+		DwmSetWindowAttribute(hWnd, DWMWA_EXCLUDED_FROM_PEEK, &b, sizeof(b));
+
 		UpdateMonitorInfo();
 		SetZOrder();
 
-		constexpr BOOL b{ 1 };
-		DwmSetWindowAttribute(hWnd, DWMWA_EXCLUDED_FROM_PEEK, &b, sizeof(b));
 		m_iDpi = eck::GetDpi(hWnd);
+		m_cxyShadowExtent = (int)ceilf(eck::DpiScaleF(std::max(
+			App.GetOpt().fDtShadowExtent,
+			App.GetOpt().fDtShadowRadius), m_iDpi));
 
 		RECT rcClient;
 		GetClientRect(hWnd, &rcClient);

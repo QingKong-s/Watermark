@@ -31,10 +31,10 @@ void CWndMain::Paint()
 	pRt->Clear({});
 	D2D1_POINT_2F pt{};
 	pRt->DrawTextLayout(pt, m_pTextLayout1.Get(), m_pBrush.Get(),
-		D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
+		App.GetOpt().GetDtlFlags());
 	pt.y += (m_cyLine1 + m_cyPadding);
 	pRt->DrawTextLayout(pt, m_pTextLayout2.Get(), m_pBrush.Get(),
-		D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
+		App.GetOpt().GetDtlFlags());
 	pRt->EndDraw();
 
 	SIZE size{ m_cxClient, m_cyClient };

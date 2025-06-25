@@ -40,16 +40,22 @@ struct Options
 	int cyPadding{};		// 行距
 	eck::CRefStrW rsLine1{};// 首行文本
 	eck::CRefStrW rsLine2{};// 次行文本
+	BOOLEAN bColorFont{};
 
+	BOOLEAN bDtColorFont{};
+	PosType eDtPos{};
+	BOOLEAN bDtShadow{};
 	eck::CRefStrW rsDtFont{};
 	int iDtPoint{};
 	int iDtWeight{};
 	ARGB crDtText{};
+	ARGB crDtShadow{};
 	int dxDt{};
 	int dyDt{};
-	PosType eDtPos{};
 	eck::CRefStrW rsDtText{};
 	eck::CRefStrW rsDtTextParsed{};// 不保存
+	float fDtShadowRadius{};
+	float fDtShadowExtent{};
 
 	void FromIni();
 	void ToIni();
@@ -57,6 +63,16 @@ struct Options
 	void SetCurrColor(ARGB cr);
 
 	void ParseDesktopText();
+
+	EckInlineNdCe auto GetDtlFlags()
+	{
+		return bColorFont ? D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT : D2D1_DRAW_TEXT_OPTIONS_NONE;
+	}
+
+	EckInlineNdCe auto GetDtDtlFlags()
+	{
+		return bDtColorFont ? D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT : D2D1_DRAW_TEXT_OPTIONS_NONE;
+	}
 };
 
 enum : UINT
