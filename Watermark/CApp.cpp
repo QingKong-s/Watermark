@@ -38,10 +38,13 @@ void Options::FromIni()
 	iDtWeight = Ini.GetKeyValue(Sec, L"DtWeight").GetInt(400);
 	crDtText = (ARGB)Ini.GetKeyValue(Sec, L"DtColor").GetInt(0xFFF0F0F0);
 	Ini.GetKeyValue(Sec, L"DtText").GetString(rsDtText, LR"(%OSCaption%
-评估副本。 %Reg.BuildLabEx%)");
+评估副本。 %Reg.BuildLabEx%
+%Reg.SystemRoot%)");
 	ParseDesktopText();
 	dxDt = Ini.GetKeyValue(Sec, L"DtMarginX").GetInt(5);
 	dyDt = Ini.GetKeyValue(Sec, L"DtMarginY").GetInt(2);
+	eDtPos = Ini.GetKeyValue(Sec, L"DtPos").GetEnumCheck(
+		PosType::Min, PosType::Max, PosType::BottomRight);
 }
 
 void Options::ToIni()

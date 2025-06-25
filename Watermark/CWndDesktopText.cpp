@@ -16,7 +16,7 @@ void CWndDesktopText::Paint()
 		D2D1_DRAW_TEXT_OPTIONS_ENABLE_COLOR_FONT);
 	pRt->EndDraw();
 
-	SIZE size{ m_cxClient, m_cyClient };
+	SIZE size{ m_cxClient,m_cyClient };
 	POINT pt1{};
 	BLENDFUNCTION bf{ AC_SRC_OVER,0,255,AC_SRC_ALPHA };
 	UpdateLayeredWindow(HWnd, nullptr, nullptr, &size,
@@ -32,7 +32,6 @@ void CWndDesktopText::ReCreateDWriteResources()
 		DWRITE_FONT_WEIGHT(Opt.iDtWeight), DWRITE_FONT_STYLE_NORMAL,
 		DWRITE_FONT_STRETCH_NORMAL, cyFont,
 		App.GetUserLocale().Data(), m_pTextFormat.AddrOfClear());
-	m_pTextFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
 	m_pTextFormat->SetWordWrapping(DWRITE_WORD_WRAPPING_NO_WRAP);
 
 	eck::g_pDwFactory->CreateTextLayout(Opt.rsDtTextParsed.Data(),
@@ -40,6 +39,10 @@ void CWndDesktopText::ReCreateDWriteResources()
 		float(m_rcMonitorWork.right - m_rcMonitorWork.left),
 		float(m_rcMonitorWork.bottom - m_rcMonitorWork.top),
 		m_pTextLayout.AddrOfClear());
+	if (Opt.eDtPos == PosType::TopLeft || Opt.eDtPos == PosType::BottomLeft)
+		m_pTextLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+	else
+		m_pTextLayout->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_TRAILING);
 }
 
 void CWndDesktopText::ReCreateMemoryDC()
@@ -65,12 +68,30 @@ void CWndDesktopText::ReCreateMemoryDC()
 
 void CWndDesktopText::CalcWindowPosition(int cx, int cy, int& x, int& y)
 {
-	DWRITE_TEXT_METRICS tm;
-	m_pTextLayout->GetMetrics(&tm);
-	x = m_rcMonitorWork.right - eck::DpiScale(App.GetOpt().dxDt, m_iDpi)
-		- (int)ceilf(tm.width - eck::DpiScaleF(1.f, m_iDpi));
-	y = m_rcMonitorWork.bottom - eck::DpiScale(App.GetOpt().dyDt, m_iDpi)
-		- (int)ceilf(tm.height - eck::DpiScaleF(1.f, m_iDpi));
+	const auto dx = eck::DpiScale(App.GetOpt().dxDt, m_iDpi);
+	const auto dy = eck::DpiScale(App.GetOpt().dyDt, m_iDpi);
+	const auto cxEdge = (int)ceilf(eck::DpiScaleF(1.f, m_iDpi));
+	const auto cyEdge = (int)ceilf(eck::DpiScaleF(1.f, m_iDpi));
+
+	switch (App.GetOpt().eDtPos)
+	{
+	case PosType::TopLeft:
+		x = m_rcMonitorWork.left + dx + cxEdge;
+		y = m_rcMonitorWork.top + dy + cyEdge;
+		break;
+	case PosType::TopRight:
+		x = m_rcMonitorWork.right - dx - cx - cxEdge;
+		y = m_rcMonitorWork.top + dy + cyEdge;
+		break;
+	case PosType::BottomLeft:
+		x = m_rcMonitorWork.left + dx + cxEdge;
+		y = m_rcMonitorWork.bottom - dy - cy - cyEdge;
+		break;
+	default:// BottomRight
+		x = m_rcMonitorWork.right - dx - cx - cxEdge;
+		y = m_rcMonitorWork.bottom - dy - cy - cyEdge;
+		break;
+	}
 }
 
 void CWndDesktopText::UpdatePosSize()
@@ -103,8 +124,13 @@ void CWndDesktopText::SetZOrder()
 {
 	const auto hProgman = FindWindowW(L"Progman", L"Program Manager");
 	if (hProgman)
+	{
+		SetWindowLongPtrW(HWnd, GWLP_HWNDPARENT, (LONG_PTR)hProgman);
 		SetWindowPos(HWnd, hProgman, 0, 0, 0, 0,
 			SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
+	}
+	else
+		SetWindowLongPtrW(HWnd, GWLP_HWNDPARENT, 0);
 }
 
 void CWndDesktopText::UpdateMonitorInfo()

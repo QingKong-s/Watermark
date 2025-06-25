@@ -25,7 +25,7 @@ LRESULT CWndMain::OnCreate(HWND hWnd, CREATESTRUCT* pcs)
 void CWndMain::Paint()
 {
 	const auto pRt = m_pRenderTarget.Get();
-	
+
 	m_pBrush->SetColor(eck::ARGBToD2dColorF(App.GetOpt().GetCurrColor()));
 	pRt->BeginDraw();
 	pRt->Clear({});

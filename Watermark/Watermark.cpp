@@ -63,9 +63,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	const auto hGhostTopMost = CreateWindowExW(dwStyleExGhost,
 		eck::WCN_DUMMY, nullptr, WS_OVERLAPPEDWINDOW,
 		-32000, -32000, 0, 0, nullptr, nullptr, hInstance, nullptr);
-	const auto hGhost = CreateWindowExW(dwStyleExTool,
-		eck::WCN_DUMMY, nullptr, WS_OVERLAPPEDWINDOW,
-		-32000, -32000, 0, 0, nullptr, nullptr, hInstance, nullptr);
 
 	pWnd->Create(nullptr, WS_POPUP, dwStyleExGhost | dwStyleExLayered,
 		0, 0, 1, 1, nullptr, 0);
@@ -74,7 +71,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	pWndDt->Create(nullptr, WS_POPUP, dwStyleExTool | dwStyleExLayered,
 		0, 0, 1, 1, nullptr, 0);
-	SetWindowLongPtrW(pWndDt->HWnd, GWLP_HWNDPARENT, (LONG_PTR)hGhost);
 	pWndDt->Show(SW_SHOWNOACTIVATE);
 
 	const auto pOptWnd = new CWndOptions{};
@@ -95,7 +91,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 			DispatchMessageW(&msg);
 		}
 	}
-	DestroyWindow(hGhost);
 	DestroyWindow(hGhostTopMost);
 	delete pOptWnd;
 	delete pWnd;

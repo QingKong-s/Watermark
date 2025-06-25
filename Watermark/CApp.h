@@ -47,6 +47,7 @@ struct Options
 	ARGB crDtText{};
 	int dxDt{};
 	int dyDt{};
+	PosType eDtPos{};
 	eck::CRefStrW rsDtText{};
 	eck::CRefStrW rsDtTextParsed{};// 不保存
 
