@@ -57,20 +57,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	const auto hMon = eck::GetOwnerMonitor(nullptr);
 	const auto iDpi = eck::GetMonitorDpi(hMon);
 
-	constexpr DWORD dwCommExStyle = WS_EX_TOPMOST |
-		WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
-	const auto hGhost = CreateWindowExW(dwCommExStyle,
+	constexpr DWORD dwStyleExTool = WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE;
+	constexpr DWORD dwStyleExGhost = WS_EX_TOPMOST | dwStyleExTool;
+	constexpr DWORD dwStyleExLayered = WS_EX_LAYERED | WS_EX_TRANSPARENT;
+	const auto hGhostTopMost = CreateWindowExW(dwStyleExGhost,
+		eck::WCN_DUMMY, nullptr, WS_OVERLAPPEDWINDOW,
+		-32000, -32000, 0, 0, nullptr, nullptr, hInstance, nullptr);
+	const auto hGhost = CreateWindowExW(dwStyleExTool,
 		eck::WCN_DUMMY, nullptr, WS_OVERLAPPEDWINDOW,
 		-32000, -32000, 0, 0, nullptr, nullptr, hInstance, nullptr);
 
-	pWnd->Create(nullptr, WS_POPUP, dwCommExStyle |
-		WS_EX_LAYERED | WS_EX_TRANSPARENT,
-		0, 0, 100, 100, nullptr, 0);
-	SetWindowLongPtrW(pWnd->HWnd, GWLP_HWNDPARENT, (LONG_PTR)hGhost);
+	pWnd->Create(nullptr, WS_POPUP, dwStyleExGhost | dwStyleExLayered,
+		0, 0, 1, 1, nullptr, 0);
+	SetWindowLongPtrW(pWnd->HWnd, GWLP_HWNDPARENT, (LONG_PTR)hGhostTopMost);
 	pWnd->Show(SW_SHOWNOACTIVATE);
 
-	pWndDt->Create(nullptr, WS_POPUP, WS_EX_TOOLWINDOW | WS_EX_NOACTIVATE |
-		WS_EX_LAYERED | WS_EX_TRANSPARENT, 0, 0, 1, 1, nullptr, 0);
+	pWndDt->Create(nullptr, WS_POPUP, dwStyleExTool | dwStyleExLayered,
+		0, 0, 1, 1, nullptr, 0);
+	SetWindowLongPtrW(pWndDt->HWnd, GWLP_HWNDPARENT, (LONG_PTR)hGhost);
 	pWndDt->Show(SW_SHOWNOACTIVATE);
 
 	const auto pOptWnd = new CWndOptions{};
@@ -92,6 +96,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		}
 	}
 	DestroyWindow(hGhost);
+	DestroyWindow(hGhostTopMost);
 	delete pOptWnd;
 	delete pWnd;
 	delete pWndDt;

@@ -99,19 +99,12 @@ void CWndDesktopText::OnAppEvent(const APP_NOTIFY& n)
 
 }
 
-void CWndDesktopText::SetOwnerProgman()
+void CWndDesktopText::SetZOrder()
 {
-	if (HWnd == nullptr)
-		return;
 	const auto hProgman = FindWindowW(L"Progman", L"Program Manager");
 	if (hProgman)
-	{
-		SetWindowLongPtrW(HWnd, GWLP_HWNDPARENT, (LONG_PTR)hProgman);
 		SetWindowPos(HWnd, hProgman, 0, 0, 0, 0,
 			SWP_NOMOVE | SWP_NOSIZE | SWP_NOACTIVATE);
-	}
-	else
-		SetWindowLongPtrW(HWnd, GWLP_HWNDPARENT, 0);
 }
 
 void CWndDesktopText::UpdateMonitorInfo()
@@ -127,7 +120,7 @@ LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 {
 	if (uMsg == s_uMsgTaskbarCreated)
 	{
-		SetOwnerProgman();
+		SetZOrder();
 		UpdatePos();
 		return 0;
 	}
@@ -156,6 +149,7 @@ LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	case WM_CREATE:
 	{
 		UpdateMonitorInfo();
+		SetZOrder();
 
 		constexpr BOOL b{ 1 };
 		DwmSetWindowAttribute(hWnd, DWMWA_EXCLUDED_FROM_PEEK, &b, sizeof(b));
@@ -167,7 +161,6 @@ LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 		m_cyClient = rcClient.bottom;
 		ReCreateMemoryDC();
 		ReCreateDWriteResources();
-		SetOwnerProgman();
 		UpdatePosSize();
 	}
 	break;

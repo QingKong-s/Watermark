@@ -32,7 +32,7 @@ private:
 
 	void OnAppEvent(const APP_NOTIFY& n);
 
-	void SetOwnerProgman();
+	void SetZOrder();
 
 	void UpdateMonitorInfo();
 public:
