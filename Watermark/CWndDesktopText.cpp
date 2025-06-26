@@ -16,7 +16,7 @@ void CWndDesktopText::Paint()
 		ComPtr<ID2D1BitmapRenderTarget> pBitmapRt;
 		pDC->CreateCompatibleRenderTarget(&pBitmapRt);
 
-		m_pBrush->SetColor(eck::ARGBToD2dColorF(App.GetOpt().crDtShadow));
+		m_pBrush->SetColor(eck::ArgbToD2DColorF(App.GetOpt().crDtShadow));
 		pBitmapRt->BeginDraw();
 		pBitmapRt->Clear({});
 		ComPtr<ID2D1PathGeometry1> pPathGeometry;
@@ -43,7 +43,7 @@ void CWndDesktopText::Paint()
 		pFx->SetValue(D2D1_GAUSSIANBLUR_PROP_BORDER_MODE, D2D1_BORDER_MODE_HARD);
 	}
 
-	m_pBrush->SetColor(eck::ARGBToD2dColorF(App.GetOpt().crDtText));
+	m_pBrush->SetColor(eck::ArgbToD2DColorF(App.GetOpt().crDtText));
 	pDC->BeginDraw();
 	pDC->Clear({});
 	if (bShadow)

@@ -430,7 +430,7 @@ void CWndOptions::ColorOptToUI()
 	WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
 	const auto argb = App.GetOpt().GetCurrColor();
 	BYTE byAlpha;
-	m_CPKColor.SetColor(eck::ARGBToColorref(argb, &byAlpha));
+	m_CPKColor.SetColor(eck::ArgbToColorref(argb, &byAlpha));
 	m_CPKColor.Redraw();
 	swprintf(szBuf, L"%d", (int)byAlpha);
 	m_EDColorAlpha.SetText(szBuf);
@@ -442,14 +442,14 @@ void CWndOptions::UIToColorOpt()
 	szBuf[0] = L'\0';
 	m_EDColorAlpha.GetText(szBuf, ARRAYSIZE(szBuf));
 	const auto byAlpha = (BYTE)wcstoul(szBuf, nullptr, 10);
-	App.GetOpt().SetCurrColor(eck::ColorrefToARGB(m_CPKColor.GetColor(), byAlpha));
+	App.GetOpt().SetCurrColor(eck::ColorrefToArgb(m_CPKColor.GetColor(), byAlpha));
 }
 
 void CWndOptions::DtTextColorOptToUI()
 {
 	WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
 	BYTE byAlpha;
-	m_CPKDtColor.SetColor(eck::ARGBToColorref(App.GetOpt().crDtText, &byAlpha));
+	m_CPKDtColor.SetColor(eck::ArgbToColorref(App.GetOpt().crDtText, &byAlpha));
 	m_CPKDtColor.Redraw();
 	swprintf(szBuf, L"%d", (int)byAlpha);
 	m_EDDtColorAlpha.SetText(szBuf);
@@ -461,14 +461,14 @@ void CWndOptions::DtUIToTextColorOpt()
 	szBuf[0] = L'\0';
 	m_EDDtColorAlpha.GetText(szBuf, ARRAYSIZE(szBuf));
 	const auto byAlpha = (BYTE)wcstoul(szBuf, nullptr, 10);
-	App.GetOpt().crDtText = eck::ColorrefToARGB(m_CPKDtColor.GetColor(), byAlpha);
+	App.GetOpt().crDtText = eck::ColorrefToArgb(m_CPKDtColor.GetColor(), byAlpha);
 }
 
 void CWndOptions::DtShadowColorOptToUI()
 {
 	WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
 	BYTE byAlpha;
-	m_CPKDtShadowColor.SetColor(eck::ARGBToColorref(App.GetOpt().crDtShadow, &byAlpha));
+	m_CPKDtShadowColor.SetColor(eck::ArgbToColorref(App.GetOpt().crDtShadow, &byAlpha));
 	m_CPKDtShadowColor.Redraw();
 	swprintf(szBuf, L"%d", (int)byAlpha);
 	m_EDDtShadowColorAlpha.SetText(szBuf);
@@ -480,7 +480,7 @@ void CWndOptions::DtUIToShadowColorOpt()
 	szBuf[0] = L'\0';
 	m_EDDtShadowColorAlpha.GetText(szBuf, ARRAYSIZE(szBuf));
 	const auto byAlpha = (BYTE)wcstoul(szBuf, nullptr, 10);
-	App.GetOpt().crDtShadow = eck::ColorrefToARGB(m_CPKDtShadowColor.GetColor(), byAlpha);
+	App.GetOpt().crDtShadow = eck::ColorrefToArgb(m_CPKDtShadowColor.GetColor(), byAlpha);
 }
 
 void CWndOptions::OptToUI()

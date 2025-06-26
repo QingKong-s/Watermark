@@ -26,7 +26,7 @@ void CWndMain::Paint()
 {
 	const auto pRt = m_pRenderTarget.Get();
 
-	m_pBrush->SetColor(eck::ARGBToD2dColorF(App.GetOpt().GetCurrColor()));
+	m_pBrush->SetColor(eck::ArgbToD2DColorF(App.GetOpt().GetCurrColor()));
 	pRt->BeginDraw();
 	pRt->Clear({});
 	D2D1_POINT_2F pt{};
