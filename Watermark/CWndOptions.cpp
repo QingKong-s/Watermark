@@ -408,15 +408,6 @@ void CWndOptions::OnSize(LPARAM lParam)
 	m_Layout.Arrange(dMar, dMar, cxClient - dMar * 2, cyClient - dMar * 2);
 
 	const auto dMarMin = eck::DpiScale(1, m_iDpi);
-
-	const auto iii = eck::GetDpi(m_Tab.HWnd);
-	m_Tab.SendMsg(WM_DPICHANGED_BEFOREPARENT, 0, 0);
-	m_Tab.SendMsg(WM_DPICHANGED_AFTERPARENT, 0, 0);
-
-	int cxOld, cyOld;
-	m_Tab.SetItemSize(INT_MAX, INT_MAX, &cxOld, &cyOld);
-	m_Tab.SetItemSize(cxOld, cyOld);
-
 	RECT rc;
 	GetClientRect(m_Tab.HWnd, &rc);
 	MapWindowRect(m_Tab.HWnd, HWnd, &rc);
