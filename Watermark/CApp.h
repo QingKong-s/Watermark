@@ -20,10 +20,14 @@ enum class ThemeType : BYTE
 	Max,
 };
 
+constexpr float ShadowMax{ 8.f };
+
 struct Options
 {
 	BOOLEAN bUia{};			// UIAccess
 	BOOLEAN bAutoRun{};		// 开机自启
+	BOOLEAN bExcludeFromSnapshot{};// 防止被截图
+
 	PosType ePos{};			// 显示位置
 	ThemeType eTheme{};		// 主题
 	int dx{};				// 偏移X
@@ -78,11 +82,13 @@ struct Options
 enum : UINT
 {
 	ANF_MA_UPDATE_POS = 1u << 0,	// 主窗口：更新位置
-	ANF_MA_UPDATE_SIZE = 1u << 1,	// 主窗口：更新尺寸
 	ANF_MA_UPDATE_PADDING = 1u << 2,// 主窗口：更新行距
 	ANF_MA_REFRESH = 1u << 3,		// 主窗口：全部刷新
 	ANF_EXIT = 1u << 4,				// 退出程序
 	ANF_MA_UPDATE_COLOR = 1u << 5,	// 主窗口：更新颜色
+	ANF_DT_REFRESH = 1u << 6,		// 桌面文本：全部刷新
+	ANF_DT_UPDATE_POS = 1u << 7,	// 桌面文本：更新位置
+	ANF_DT_UPDATE_COLOR = 1u << 1,	// 桌面文本：更新尺寸
 };
 
 struct APP_NOTIFY

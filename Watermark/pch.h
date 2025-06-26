@@ -14,6 +14,8 @@
 #include "eck\CIniExt.h"
 #include "eck\ShellHelper.h"
 #include "eck\CRegKey.h"
+#include "eck\CTab.h"
+#include "eck\CFrameLayout.h"
 
 #define SECURITY_WIN32 1
 #include <security.h>

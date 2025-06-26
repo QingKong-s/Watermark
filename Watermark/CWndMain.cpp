@@ -122,18 +122,21 @@ void CWndMain::ReCreateDWriteResources()
 
 void CWndMain::OnAppEvent(const APP_NOTIFY& n)
 {
+	if (n.uFlags & ANF_EXIT)
+	{
+		Destroy();
+		return;
+	}
 	if (n.uFlags & ANF_MA_REFRESH)
 	{
 		ReCreateDWriteResources();
 		UpdatePosSize();
 		return;
 	}
-	if (n.uFlags & ANF_MA_UPDATE_SIZE)
-		UpdatePosSize();
-	else if (n.uFlags & ANF_MA_UPDATE_POS)
-		UpdatePos();
-	else if (n.uFlags & ANF_MA_UPDATE_COLOR)
+	if (n.uFlags & ANF_MA_UPDATE_COLOR)
 		Paint();
+	if (n.uFlags & ANF_MA_UPDATE_POS)
+		UpdatePos();
 }
 
 LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)

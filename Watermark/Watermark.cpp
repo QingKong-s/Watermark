@@ -74,7 +74,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 	pWndDt->Show(SW_SHOWNOACTIVATE);
 
 	const auto pOptWnd = new CWndOptions{};
-	SIZE size = { 410, 430 };
+	SIZE size = { 400, 450 };
 	eck::DpiScale(size, iDpi);
 	const auto pt = eck::CalcCenterWndPos(nullptr, size.cx, size.cy);
 

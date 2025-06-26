@@ -8,11 +8,13 @@ void Options::FromIni()
 {
 	eck::CIniExtMut Ini{};
 	const auto rbIni = eck::ReadInFile((eck::GetRunningPath() + L"\\Options.ini").Data());
-	Ini.Load((PCWSTR)rbIni.Data(), rbIni.Size() / sizeof WCHAR);
+	Ini.Load((PCWSTR)rbIni.Data(), rbIni.Size() / sizeof WCHAR, eck::INIE_IF_ESCAPE);
 	auto Sec = Ini.GetSection(L"Watermark");
 
 	bUia = Ini.GetKeyValue(Sec, L"UIAccess").GetBool();
 	bAutoRun = Ini.GetKeyValue(Sec, L"AutoRun").GetBool();
+	bExcludeFromSnapshot = Ini.GetKeyValue(Sec, L"ExcludeFromSnapshot").GetBool();
+
 	ePos = Ini.GetKeyValue(Sec, L"Pos").GetEnumCheck(
 		PosType::Min, PosType::Max, PosType::BottomRight);
 	dx = Ini.GetKeyValue(Sec, L"MarginX").GetInt(100);
@@ -38,17 +40,20 @@ void Options::FromIni()
 	iDtPoint = Ini.GetKeyValue(Sec, L"DtSize").GetInt(10);
 	iDtWeight = Ini.GetKeyValue(Sec, L"DtWeight").GetInt(400);
 	crDtText = (ARGB)Ini.GetKeyValue(Sec, L"DtColor").GetInt(0xFFFFFFFF);
-	Ini.GetKeyValue(Sec, L"DtText").GetString(rsDtText, LR"(%OSCaption%
-评估副本。⚠️ %Reg.BuildLabEx%
-%Reg.SystemRoot%)");
+	Ini.GetKeyValue(Sec, L"DtText").GetString(rsDtText,
+		L"%OSCaption%\r\n"
+		L"评估副本。⚠️ %Reg.BuildLabEx%\r\n"
+		L"%Reg.SystemRoot%");
 	ParseDesktopText();
 	dxDt = Ini.GetKeyValue(Sec, L"DtMarginX").GetInt(5);
 	dyDt = Ini.GetKeyValue(Sec, L"DtMarginY").GetInt(2);
 	eDtPos = Ini.GetKeyValue(Sec, L"DtPos").GetEnumCheck(
 		PosType::Min, PosType::Max, PosType::BottomRight);
 	bDtShadow = Ini.GetKeyValue(Sec, L"DtShadow").GetBool(TRUE);
-	fDtShadowRadius = (float)Ini.GetKeyValue(Sec, L"DtShadowRadius").GetDouble(1.0f);
-	fDtShadowExtent = (float)Ini.GetKeyValue(Sec, L"DtShadowExtent").GetDouble(1.0f);
+	fDtShadowRadius = std::clamp((float)Ini.GetKeyValue(Sec, L"DtShadowRadius").GetDouble(3.0f),
+		0.f, ShadowMax);
+	fDtShadowExtent = std::clamp((float)Ini.GetKeyValue(Sec, L"DtShadowExtent").GetDouble(1.0f),
+		0.f, ShadowMax);
 	crDtShadow = (ARGB)Ini.GetKeyValue(Sec, L"DtShadowColor").GetInt(0xFF000000);
 	bDtColorFont = Ini.GetKeyValue(Sec, L"DtColorFont").GetBool(TRUE);
 }
@@ -58,10 +63,13 @@ void Options::ToIni()
 	eck::CRefStrW rs{};
 	eck::CIniExtMut Ini{};
 	auto Sec = Ini.CreateSection(L"Watermark");
-	rs.Format(L"%d", bUia);
+	rs.Format(L"%d", !!bUia);
 	Ini.CreateKeyValue(Sec, L"UIAccess", rs.ToStringView());
-	rs.Format(L"%d", bAutoRun);
+	rs.Format(L"%d", !!bAutoRun);
 	Ini.CreateKeyValue(Sec, L"AutoRun", rs.ToStringView());
+	rs.Format(L"%d", !!bExcludeFromSnapshot);
+	Ini.CreateKeyValue(Sec, L"ExcludeFromSnapshot", rs.ToStringView());
+
 	rs.Format(L"%d", ePos);
 	Ini.CreateKeyValue(Sec, L"Pos", rs.ToStringView());
 	rs.Format(L"%d", dx);
@@ -90,7 +98,7 @@ void Options::ToIni()
 	Ini.CreateKeyValue(Sec, L"Padding", rs.ToStringView());
 	Ini.CreateKeyValue(Sec, L"Text1", rsLine1.ToStringView());
 	Ini.CreateKeyValue(Sec, L"Text2", rsLine2.ToStringView());
-	rs.Format(L"%d", bColorFont);
+	rs.Format(L"%d", !!bColorFont);
 	Ini.CreateKeyValue(Sec, L"ColorFont", rs.ToStringView());
 
 	Sec = Ini.CreateSection(L"DesktopWatermark");
@@ -108,7 +116,7 @@ void Options::ToIni()
 	Ini.CreateKeyValue(Sec, L"DtMarginY", rs.ToStringView());
 	rs.Format(L"%d", eDtPos);
 	Ini.CreateKeyValue(Sec, L"DtPos", rs.ToStringView());
-	rs.Format(L"%d", bDtShadow);
+	rs.Format(L"%d", !!bDtShadow);
 	Ini.CreateKeyValue(Sec, L"DtShadow", rs.ToStringView());
 	rs.Format(L"%.2f", fDtShadowRadius);
 	Ini.CreateKeyValue(Sec, L"DtShadowRadius", rs.ToStringView());
@@ -116,12 +124,11 @@ void Options::ToIni()
 	Ini.CreateKeyValue(Sec, L"DtShadowExtent", rs.ToStringView());
 	rs.Format(L"%d", crDtShadow);
 	Ini.CreateKeyValue(Sec, L"DtShadowColor", rs.ToStringView());
-	rs.Format(L"%d", bDtColorFont);
+	rs.Format(L"%d", !!bDtColorFont);
 	Ini.CreateKeyValue(Sec, L"DtColorFont", rs.ToStringView());
 
-
 	rs.Clear();
-	Ini.Save(rs);
+	Ini.Save(rs, eck::INIE_IF_ESCAPE);
 	eck::WriteToFile((eck::GetRunningPath() + L"\\Options.ini").Data(),
 		rs.Data(), (DWORD)rs.ByteSizePure());
 }
