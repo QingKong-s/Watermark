@@ -401,12 +401,21 @@ void CWndOptions::OnSize(LPARAM lParam)
 	ECK_GET_SIZE_LPARAM(cxClient, cyClient, lParam);
 
 	const auto dMar = eck::DpiScale(8, m_iDpi);
-	const auto dMarMin = eck::DpiScale(1, m_iDpi);
 
 	m_LytComm.SetColWidth(0, cxClient / 2 - dMar);
 	m_LytComm.SetColWidth(1, cxClient / 2 - dMar);
 	m_LytComm.CommitTableMetrics();
 	m_Layout.Arrange(dMar, dMar, cxClient - dMar * 2, cyClient - dMar * 2);
+
+	const auto dMarMin = eck::DpiScale(1, m_iDpi);
+
+	const auto iii = eck::GetDpi(m_Tab.HWnd);
+	m_Tab.SendMsg(WM_DPICHANGED_BEFOREPARENT, 0, 0);
+	m_Tab.SendMsg(WM_DPICHANGED_AFTERPARENT, 0, 0);
+
+	int cxOld, cyOld;
+	m_Tab.SetItemSize(INT_MAX, INT_MAX, &cxOld, &cyOld);
+	m_Tab.SetItemSize(cxOld, cyOld);
 
 	RECT rc;
 	GetClientRect(m_Tab.HWnd, &rc);
@@ -758,8 +767,17 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			switch (pnmhdr->code)
 			{
 			case TCN_SELCHANGE:
+			{
+				SetRedraw(FALSE);
 				m_LytTab.ShowFrame(m_Tab.GetCurSel());
-				return 0;
+				SetRedraw(TRUE);
+				RECT rc;
+				GetClientRect(m_Tab.HWnd, &rc);
+				MapWindowRect(m_Tab.HWnd, hWnd, &rc);
+				RedrawWindow(hWnd, &rc, nullptr,
+					RDW_ALLCHILDREN | RDW_INVALIDATE | RDW_UPDATENOW);
+			}
+			return 0;
 			}
 	}
 	break;
@@ -804,11 +822,11 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	case WM_DPICHANGED:
 	{
 		m_iDpi = LOWORD(wParam);
+		UpdateDpi();
 		UpdateTableLayoutRowHeight();
 		m_Layout.LoOnDpiChanged(m_iDpi);
 		m_LytTab.LoOnDpiChanged(m_iDpi);
 		eck::MsgOnDpiChanged(hWnd, lParam);
-		UpdateDpi();
 	}
 	break;
 	case WM_CREATE:
