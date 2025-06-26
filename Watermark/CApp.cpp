@@ -20,15 +20,15 @@ void Options::FromIni()
 	dx = Ini.GetKeyValue(Sec, L"MarginX").GetInt(110);
 	dy = Ini.GetKeyValue(Sec, L"MarginY").GetInt(45);
 	eTheme = Ini.GetKeyValue(Sec, L"Theme").GetEnumCheck(
-		ThemeType::Min, ThemeType::Max);
+		ThemeType::Min, ThemeType::Max, ThemeType::Auto);
 	Ini.GetKeyValue(Sec, L"Font1").GetString(Font1, L"Segoe UI");
 	iPoint1 = Ini.GetKeyValue(Sec, L"Size1").GetInt(20);
-	iWeight1 = Ini.GetKeyValue(Sec, L"Weight1").GetInt(380);
+	iWeight1 = Ini.GetKeyValue(Sec, L"Weight1").GetInt(370);
 	Ini.GetKeyValue(Sec, L"Font2").GetString(Font2, L"Segoe UI");
 	iPoint2 = Ini.GetKeyValue(Sec, L"Size2").GetInt(13);
 	iWeight2 = Ini.GetKeyValue(Sec, L"Weight2").GetInt(380);
 	crLight = (ARGB)Ini.GetKeyValue(Sec, L"ColorLight").GetInt(0x66C4C4C4);
-	crDark = (ARGB)Ini.GetKeyValue(Sec, L"ColorDark").GetInt(0x33888888);
+	crDark = (ARGB)Ini.GetKeyValue(Sec, L"ColorDark").GetInt(0x33989898);
 	crCommon = (ARGB)Ini.GetKeyValue(Sec, L"ColorCommon").GetInt(0x66C4C4C4);
 	cyPadding = Ini.GetKeyValue(Sec, L"Padding").GetInt(0);
 	Ini.GetKeyValue(Sec, L"Text1").GetString(rsLine1, L"激活 Windows");
