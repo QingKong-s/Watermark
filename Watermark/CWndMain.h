@@ -19,8 +19,6 @@ private:
 	int m_cyClient{};
 	int m_iDpi{ USER_DEFAULT_SCREEN_DPI };
 
-	void ClearRes();
-
 	LRESULT OnCreate(HWND hWnd, CREATESTRUCT* pcs);
 
 	void UpdatePosSize();

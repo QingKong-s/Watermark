@@ -6,3 +6,5 @@ enum class DtTextErr
 };
 
 DtTextErr ParseDesktopText(PCWSTR pszText, eck::CRefStrW& rsOut);
+
+BOOL ExcludeFromSnapshot(HWND hWnd, BOOL bExclude = TRUE);

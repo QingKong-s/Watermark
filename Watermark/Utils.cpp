@@ -68,6 +68,18 @@ DtTextErr ParseDesktopText(PCWSTR pszText, eck::CRefStrW& rsOut)
 						VariantClear(&Var);
 					}
 				}
+				else if (PDT_HitString(L"PCName"))
+				{
+					DWORD cchBuf{ MAX_COMPUTERNAME_LENGTH + 1 };
+					const auto cchOld = rsOut.Size();
+					if (GetComputerNameW(rsOut.PushBack(cchBuf), &cchBuf))
+						rsOut.ReSize(cchOld + cchBuf);
+					else
+					{
+						rsOut.PopBack((int)cchBuf);
+						rsOut.PushBack(pszLastPercent, (int)cch + 2);
+					}
+				}
 				else
 					rsOut.PushBack(pszLastPercent, (int)cch + 2);
 #undef PDT_HitString
@@ -86,4 +98,18 @@ DtTextErr ParseDesktopText(PCWSTR pszText, eck::CRefStrW& rsOut)
 			rsOut.PushBackChar(ch);
 	}
 	return DtTextErr::Ok;
+}
+
+BOOL ExcludeFromSnapshot(HWND hWnd, BOOL bExclude)
+{
+	const auto b1 = SetWindowDisplayAffinity(hWnd,
+		bExclude ? WDA_EXCLUDEFROMCAPTURE : WDA_NONE);
+	const WINDOWCOMPOSITIONATTRIBDATA wcad
+	{
+		WCA_EXCLUDED_FROM_DDA,
+		&bExclude,
+		sizeof(bExclude)
+	};
+	const auto b2 = SetWindowCompositionAttribute(hWnd, &wcad);
+	return b1 && b2;
 }

@@ -1,12 +1,11 @@
 ﻿#include "pch.h"
 #include "CWndMain.h"
-
-void CWndMain::ClearRes()
-{
-}
+#include "Utils.h"
 
 LRESULT CWndMain::OnCreate(HWND hWnd, CREATESTRUCT* pcs)
 {
+	ExcludeFromSnapshot(hWnd, App.GetOpt().bExcludeFromSnapshot);
+
 	constexpr BOOL b{ 1 };
 	DwmSetWindowAttribute(hWnd, DWMWA_EXCLUDED_FROM_PEEK, &b, sizeof(b));
 	eck::GetThreadCtx()->UpdateDefColor();
@@ -131,6 +130,7 @@ void CWndMain::OnAppEvent(const APP_NOTIFY& n)
 	{
 		ReCreateDWriteResources();
 		UpdatePosSize();
+		ExcludeFromSnapshot(HWnd, App.GetOpt().bExcludeFromSnapshot);
 		return;
 	}
 	if (n.uFlags & ANF_MA_UPDATE_COLOR)
@@ -152,11 +152,6 @@ LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 	case WM_CREATE:
 		return OnCreate(hWnd, (CREATESTRUCT*)lParam);
-
-	case WM_DESTROY:
-		ClearRes();
-		PostQuitMessage(0);
-		return 0;
 
 	case WM_SYSCOLORCHANGE:
 		eck::MsgOnSysColorChangeMainWnd(hWnd, wParam, lParam);

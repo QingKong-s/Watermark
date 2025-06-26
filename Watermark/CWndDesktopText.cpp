@@ -1,5 +1,6 @@
 ﻿#include "pch.h"
 #include "CWndDesktopText.h"
+#include "Utils.h"
 
 const static UINT s_uMsgTaskbarCreated = RegisterWindowMessageW(L"TaskbarCreated");
 
@@ -165,6 +166,7 @@ void CWndDesktopText::OnAppEvent(const APP_NOTIFY& n)
 		UpdateShadowExtent();
 		ReCreateDWriteResources();
 		UpdatePosSize();
+		ExcludeFromSnapshot(HWnd, App.GetOpt().bExcludeFromSnapshot);
 		return;
 	}
 	if (n.uFlags & ANF_DT_UPDATE_COLOR)
@@ -235,6 +237,8 @@ LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 
 	case WM_CREATE:
 	{
+		ExcludeFromSnapshot(hWnd, App.GetOpt().bExcludeFromSnapshot);
+		
 		constexpr BOOL b{ 1 };
 		DwmSetWindowAttribute(hWnd, DWMWA_EXCLUDED_FROM_PEEK, &b, sizeof(b));
 

@@ -14,8 +14,7 @@ private:
 	eck::CLabel m_LAPos{};
 	eck::CComboBoxNew m_CCBPos{};
 
-	eck::CLabel m_LAPadding{};
-	eck::CEditExt m_EDPadding{};
+	eck::CButton m_CBColorFont{};
 
 	eck::CLabel m_LADx{};
 	eck::CEditExt m_EDDx{};
@@ -25,8 +24,8 @@ private:
 	eck::CLabel m_LATheme{};
 	eck::CComboBoxNew m_CCBTheme{};
 
-	eck::CLabel m_LAColorFont{};
-	eck::CButton m_CBColorFont{};
+	eck::CLabel m_LAPadding{};
+	eck::CEditExt m_EDPadding{};
 
 	eck::CLabel m_LAColor{};
 	eck::CColorPicker m_CPKColor{};
@@ -49,7 +48,6 @@ private:
 	eck::CLabel m_LADtPos{};
 	eck::CComboBoxNew m_CCBDtPos{};
 
-	eck::CLabel m_LADtColorFont{};
 	eck::CButton m_CBDtColorFont{};
 
 	eck::CLabel m_LADtDx{};

@@ -42,8 +42,8 @@ void Options::FromIni()
 	crDtText = (ARGB)Ini.GetKeyValue(Sec, L"DtColor").GetInt(0xFFFFFFFF);
 	Ini.GetKeyValue(Sec, L"DtText").GetString(rsDtText,
 		L"%OSCaption%\r\n"
-		L"评估副本。⚠️ %Reg.BuildLabEx%\r\n"
-		L"%Reg.SystemRoot%");
+		L"%PCName%\r\n"
+		L"%Reg.BuildLabEx%");
 	ParseDesktopText();
 	dxDt = Ini.GetKeyValue(Sec, L"DtMarginX").GetInt(5);
 	dyDt = Ini.GetKeyValue(Sec, L"DtMarginY").GetInt(2);

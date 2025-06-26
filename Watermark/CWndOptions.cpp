@@ -113,17 +113,9 @@ void CWndOptions::OnCreate(HWND hWnd)
 		m_CCBPos.GetListBox().SetItemCount(ARRAYSIZE(ItemsPos));
 		m_LytMain.Add(&m_CCBPos, iLine, 1, Mar, eck::LF_FILL);
 
-		m_LAPadding.Create(L"行间距：", dwStyleStatic, 0,
+		m_CBColorFont.Create(L"启用彩色字体", dwStyle | BS_AUTOCHECKBOX, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LAPadding.SetAlign(FALSE, eck::Align::Center);
-		m_LAPadding.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LAPadding, iLine, 2, Mar, eck::LF_FILL);
-
-		m_EDPadding.Create(0, dwStyle, WS_EX_CLIENTEDGE,
-			0, 0, 0, 0, hWnd, 0);
-		m_EDPadding.SetInputMode(eck::CEditExt::InputMode::Int);
-		m_EDPadding.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
-		m_LytMain.Add(&m_EDPadding, iLine, 3, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_CBColorFont, iLine, 2, Mar, eck::LF_FILL, 0, 1);
 
 		++iLine;
 
@@ -163,6 +155,18 @@ void CWndOptions::OnCreate(HWND hWnd)
 			0, 0, 0, 0, hWnd, 0);
 		m_CCBTheme.GetListBox().SetItemCount(ARRAYSIZE(ItemsTheme));
 		m_LytMain.Add(&m_CCBTheme, iLine, 1, Mar, eck::LF_FILL);
+
+		m_LAPadding.Create(L"行间距：", dwStyleStatic, 0,
+			0, 0, 0, 0, hWnd, 0);
+		m_LAPadding.SetAlign(FALSE, eck::Align::Center);
+		m_LAPadding.SetTransparent(TRUE);
+		m_LytMain.Add(&m_LAPadding, iLine, 2, Mar, eck::LF_FILL);
+
+		m_EDPadding.Create(0, dwStyle, WS_EX_CLIENTEDGE,
+			0, 0, 0, 0, hWnd, 0);
+		m_EDPadding.SetInputMode(eck::CEditExt::InputMode::Int);
+		m_EDPadding.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
+		m_LytMain.Add(&m_EDPadding, iLine, 3, Mar, eck::LF_FILL);
 
 		++iLine;
 
@@ -244,6 +248,10 @@ void CWndOptions::OnCreate(HWND hWnd)
 			0, 0, 0, 0, hWnd, 0);
 		m_CCBDtPos.GetListBox().SetItemCount(ARRAYSIZE(ItemsPos));
 		m_LytDt.Add(&m_CCBDtPos, iLine, 1, Mar, eck::LF_FILL);
+
+		m_CBDtColorFont.Create(L"启用彩色字体", dwStyle | BS_AUTOCHECKBOX, 0,
+			0, 0, 0, 0, hWnd, 0);
+		m_LytDt.Add(&m_CBDtColorFont, iLine, 2, Mar, eck::LF_FILL, 0, 1);
 
 		++iLine;
 
@@ -490,6 +498,8 @@ void CWndOptions::OptToUI()
 	eck::FONTPICKERINFO fpki;
 	m_CBUia.SetCheckState(!!Opt.bUia);
 	m_CBAutoRun.SetCheckState(!!Opt.bAutoRun);
+	m_CBExcludeFromSnapshot.SetCheckState(!!Opt.bExcludeFromSnapshot);
+
 	m_CCBPos.GetListBox().SetCurrSel((int)Opt.ePos);
 	swprintf(szBuf, L"%d", Opt.cyPadding);
 	m_EDPadding.SetText(szBuf);
@@ -532,6 +542,8 @@ void CWndOptions::UIToOpt()
 	auto& Opt = App.GetOpt();
 	Opt.bUia = !!m_CBUia.GetCheckState();
 	Opt.bAutoRun = !!m_CBAutoRun.GetCheckState();
+	Opt.bExcludeFromSnapshot = !!m_CBExcludeFromSnapshot.GetCheckState();
+
 	Opt.ePos = (PosType)m_CCBPos.GetListBox().GetCurrSel();
 	WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
 	szBuf[0] = L'\0';
@@ -568,6 +580,7 @@ void CWndOptions::UIToOpt()
 	Opt.iDtPoint = fpki.iPointSize;
 	Opt.iDtWeight = fpki.iWeight;
 	Opt.rsDtText = m_EDDtText.GetText();
+	Opt.ParseDesktopText();
 	szBuf[0] = L'\0';
 	m_EDDtShadowRadius.GetText(szBuf, ARRAYSIZE(szBuf));
 	Opt.fDtShadowRadius = std::clamp((float)_wtof(szBuf), 0.f, ShadowMax);
