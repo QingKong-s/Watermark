@@ -17,22 +17,22 @@ void Options::FromIni()
 
 	ePos = Ini.GetKeyValue(Sec, L"Pos").GetEnumCheck(
 		PosType::Min, PosType::Max, PosType::BottomRight);
-	dx = Ini.GetKeyValue(Sec, L"MarginX").GetInt(100);
-	dy = Ini.GetKeyValue(Sec, L"MarginY").GetInt(50);
+	dx = Ini.GetKeyValue(Sec, L"MarginX").GetInt(110);
+	dy = Ini.GetKeyValue(Sec, L"MarginY").GetInt(45);
 	eTheme = Ini.GetKeyValue(Sec, L"Theme").GetEnumCheck(
 		ThemeType::Min, ThemeType::Max);
 	Ini.GetKeyValue(Sec, L"Font1").GetString(Font1, L"Segoe UI");
-	iPoint1 = Ini.GetKeyValue(Sec, L"Size1").GetInt(16);
-	iWeight1 = Ini.GetKeyValue(Sec, L"Weight1").GetInt(340);
+	iPoint1 = Ini.GetKeyValue(Sec, L"Size1").GetInt(20);
+	iWeight1 = Ini.GetKeyValue(Sec, L"Weight1").GetInt(380);
 	Ini.GetKeyValue(Sec, L"Font2").GetString(Font2, L"Segoe UI");
-	iPoint2 = Ini.GetKeyValue(Sec, L"Size2").GetInt(12);
-	iWeight2 = Ini.GetKeyValue(Sec, L"Weight2").GetInt(340);
+	iPoint2 = Ini.GetKeyValue(Sec, L"Size2").GetInt(13);
+	iWeight2 = Ini.GetKeyValue(Sec, L"Weight2").GetInt(380);
 	crLight = (ARGB)Ini.GetKeyValue(Sec, L"ColorLight").GetInt(0x66C4C4C4);
 	crDark = (ARGB)Ini.GetKeyValue(Sec, L"ColorDark").GetInt(0x33888888);
 	crCommon = (ARGB)Ini.GetKeyValue(Sec, L"ColorCommon").GetInt(0x66C4C4C4);
-	cyPadding = Ini.GetKeyValue(Sec, L"Padding").GetInt(2);
+	cyPadding = Ini.GetKeyValue(Sec, L"Padding").GetInt(0);
 	Ini.GetKeyValue(Sec, L"Text1").GetString(rsLine1, L"激活 Windows");
-	Ini.GetKeyValue(Sec, L"Text2").GetString(rsLine2, L"转到“设置”以激活 Windows");
+	Ini.GetKeyValue(Sec, L"Text2").GetString(rsLine2, L"转到“设置”以激活 Windows。");
 	bColorFont = Ini.GetKeyValue(Sec, L"ColorFont").GetBool(TRUE);
 
 	Sec = Ini.GetSection(L"DesktopWatermark");
