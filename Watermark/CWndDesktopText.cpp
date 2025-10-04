@@ -21,8 +21,8 @@ void CWndDesktopText::Paint()
 		pBitmapRt->BeginDraw();
 		pBitmapRt->Clear({});
 		ComPtr<ID2D1PathGeometry1> pPathGeometry;
-		eck::GetTextLayoutPathGeometry(m_pTextLayout.Get(), pDC,
-			ptOrg.x, ptOrg.y, pPathGeometry.RefOf());
+		eck::GetTextLayoutPathGeometry(m_pTextLayout.Get(),
+			ptOrg.x, ptOrg.y, pPathGeometry.RefOf(), (float)m_iDpi);
 		ComPtr<ID2D1PathGeometry1> pPathGeometryWidened;
 		eck::g_pD2dFactory->CreatePathGeometry(&pPathGeometryWidened);
 		ComPtr<ID2D1GeometrySink> pSink;

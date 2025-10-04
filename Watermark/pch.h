@@ -16,6 +16,7 @@
 #include "eck\CRegKey.h"
 #include "eck\CTab.h"
 #include "eck\CFrameLayout.h"
+#include "eck\DwLayoutPath.h"
 
 #define SECURITY_WIN32 1
 #include <security.h>
