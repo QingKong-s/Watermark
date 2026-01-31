@@ -24,7 +24,7 @@ void CWndDesktopText::Paint()
 		eck::GetTextLayoutPathGeometry(m_pTextLayout.Get(),
 			ptOrg.x, ptOrg.y, pPathGeometry.RefOf(), (float)m_iDpi);
 		ComPtr<ID2D1PathGeometry1> pPathGeometryWidened;
-		eck::g_pD2dFactory->CreatePathGeometry(&pPathGeometryWidened);
+		eck::g_pD2DFactory->CreatePathGeometry(&pPathGeometryWidened);
 		ComPtr<ID2D1GeometrySink> pSink;
 		pPathGeometryWidened->Open(&pSink);
 		pPathGeometry->Widen(eck::DpiScaleF(App.GetOpt().fDtShadowExtent, m_iDpi),
@@ -96,7 +96,7 @@ void CWndDesktopText::ReCreateMemoryDC()
 		.dpiX = 96.f,
 		.dpiY = 96.f,
 	};
-	eck::g_pD2dFactory->CreateDCRenderTarget(&RtProps, &m_pRenderTarget);
+	eck::g_pD2DFactory->CreateDCRenderTarget(&RtProps, &m_pRenderTarget);
 	m_pRenderTarget->CreateSolidColorBrush({}, &m_pBrush);
 	m_pRenderTarget->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
 	const RECT rcSub{ 0,0,m_cxClient, m_cyClient };
@@ -144,7 +144,7 @@ void CWndDesktopText::UpdatePosSize()
 	Paint();
 }
 
-void CWndDesktopText::UpdatePos()
+void CWndDesktopText::UpdatePosition()
 {
 	int x, y;
 	CalcWindowPosition(m_cxClient - m_cxyShadowExtent * 2,
@@ -172,7 +172,7 @@ void CWndDesktopText::OnAppEvent(const APP_NOTIFY& n)
 	if (n.uFlags & ANF_DT_UPDATE_COLOR)
 		Paint();
 	if (n.uFlags & ANF_DT_UPDATE_POS)
-		UpdatePos();
+		UpdatePosition();
 }
 
 void CWndDesktopText::SetZOrder()
@@ -204,12 +204,12 @@ void CWndDesktopText::UpdateShadowExtent()
 		App.GetOpt().fDtShadowRadius), m_iDpi));
 }
 
-LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CWndDesktopText::OnMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	if (uMsg == s_uMsgTaskbarCreated)
 	{
 		SetZOrder();
-		UpdatePos();
+		UpdatePosition();
 		return 0;
 	}
 
@@ -221,7 +221,7 @@ LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 			wParam == SPI_SETWORKAREA)
 		{
 			UpdateMonitorInfo();
-			UpdatePos();
+			UpdatePosition();
 		}
 		eck::MsgOnSettingChangeFixDpiAwareV2(hWnd, wParam, lParam);
 	}
@@ -267,5 +267,5 @@ LRESULT CWndDesktopText::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	}
 	return 0;
 	}
-	return __super::OnMsg(hWnd, uMsg, wParam, lParam);
+	return __super::OnMessage(hWnd, uMsg, wParam, lParam);
 }

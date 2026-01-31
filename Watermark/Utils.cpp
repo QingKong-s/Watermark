@@ -56,7 +56,7 @@ DtTextErr ParseDesktopText(PCWSTR pszText, eck::CRefStrW& rsOut)
 				else if (PDT_HitString(L"OSCaption"))
 				{
 					VARIANT Var{};
-					if (FAILED(eck::WmiQueryClassProp(L"SELECT Caption FROM Win32_OperatingSystem",
+					if (FAILED(eck::WmiQueryClassProperty(L"SELECT Caption FROM Win32_OperatingSystem",
 						L"Caption", Var)) ||
 						Var.vt != VT_BSTR ||
 						Var.bstrVal == nullptr)

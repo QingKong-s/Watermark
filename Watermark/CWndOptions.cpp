@@ -38,8 +38,8 @@ enum
 
 void CWndOptions::UpdateDpi()
 {
-	const auto hFont = eck::CreateDefFont(m_iDpi);
-	eck::SetFontForWndAndCtrl(HWnd, hFont);
+	const auto hFont = eck::DftCreate(m_iDpi);
+	eck::ApplyWindowFont(HWnd, hFont);
 	DeleteObject(m_hFont);
 	m_hFont = hFont;
 
@@ -57,17 +57,14 @@ void CWndOptions::OnCreate(HWND hWnd)
 
 	m_iDpi = eck::GetDpi(hWnd);
 
-	const auto xMar = eck::DpiScale(2, m_iDpi);
-	const auto yMar = eck::DpiScale(4, m_iDpi);
-	const MARGINS Mar{ xMar, yMar, xMar, yMar };
+	const auto xMar = eck::DpiScale(2.f, m_iDpi);
+	const auto yMar = eck::DpiScale(4.f, m_iDpi);
+	const eck::LYTMARGINS Mar{ xMar, yMar, xMar, yMar };
 
 	// 7行4列
-	m_LytComm.SetRowCol(2, 2);
-	m_LytComm.SetCellMode(eck::TlCellMode::Fixed);
-	m_LytMain.SetRowCol(10, 4);
-	m_LytMain.SetCellMode(eck::TlCellMode::Fixed);
-	m_LytDt.SetRowCol(10, 4);
-	m_LytDt.SetCellMode(eck::TlCellMode::Fixed);
+	m_LytComm.ReSizeTable(2, 2);
+	m_LytMain.ReSizeTable(10, 4);
+	m_LytDt.ReSizeTable(10, 4);
 
 	UpdateTableLayoutRowHeight();
 
@@ -84,155 +81,153 @@ void CWndOptions::OnCreate(HWND hWnd)
 	{
 		m_CBUia.Create(L"UIAccess", dwStyle | BS_AUTOCHECKBOX, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytComm.Add(&m_CBUia, iLine, 0, Mar, eck::LF_FILL, 0, 0);
+		m_LytComm.Add(&m_CBUia, iLine, 0, Mar);
 
 		m_CBAutoRun.Create(L"开机自启", dwStyle | BS_AUTOCHECKBOX, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytComm.Add(&m_CBAutoRun, iLine, 1, Mar, eck::LF_FILL, 0, 0);
+		m_LytComm.Add(&m_CBAutoRun, iLine, 1, Mar);
 
 		++iLine;
 
 		m_CBExcludeFromSnapshot.Create(L"防止被截图", dwStyle | BS_AUTOCHECKBOX, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytComm.Add(&m_CBExcludeFromSnapshot, 1, 0, Mar, eck::LF_FILL, 0, 0);
+		m_LytComm.Add(&m_CBExcludeFromSnapshot, 1, 0, Mar);
 		iLine = 0;
-
-		m_LytComm.CommitTableMetrics();
 	}
-	m_Layout.Add(&m_LytComm, {}, eck::LF_FILL_WIDTH | eck::LF_FIX_HEIGHT);
+	m_Layout.Add(&m_LytComm, {}, eck::LF_FIX_HEIGHT);
 	// 第一页
 	{
 		m_LAPos.Create(L"显示位置：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LAPos.SetAlign(FALSE, eck::Align::Center);
+		m_LAPos.SetAlignment(FALSE, eck::Align::Center);
 		m_LAPos.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LAPos, iLine, 0, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LAPos, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_CCBPos.Create(nullptr, dwStyle, 0,
 			0, 0, 0, 0, hWnd, 0);
 		m_CCBPos.GetListBox().SetItemCount(ARRAYSIZE(ItemsPos));
-		m_LytMain.Add(&m_CCBPos, iLine, 1, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_CCBPos, iLine, 1, Mar);
 
 		m_CBColorFont.Create(L"启用彩色字体", dwStyle | BS_AUTOCHECKBOX, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytMain.Add(&m_CBColorFont, iLine, 2, Mar, eck::LF_FILL, 0, 1);
+		m_LytMain.Add(&m_CBColorFont, iLine, 2, Mar, 0, 1, 2);
 
 		++iLine;
 
 		m_LADx.Create(L"水平边距：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADx.SetAlign(FALSE, eck::Align::Center);
+		m_LADx.SetAlignment(FALSE, eck::Align::Center);
 		m_LADx.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LADx, iLine, 0, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LADx, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_EDDx.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
 		m_EDDx.SetInputMode(eck::CEditExt::InputMode::Int);
 		m_EDDx.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
-		m_LytMain.Add(&m_EDDx, iLine, 1, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_EDDx, iLine, 1, Mar, 0);
 
 		m_LADy.Create(L"垂直边距：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADy.SetAlign(FALSE, eck::Align::Center);
+		m_LADy.SetAlignment(FALSE, eck::Align::Center);
 		m_LADy.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LADy, iLine, 2, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LADy, iLine, 2, Mar, eck::LF_IDEAL);
 
 		m_EDDy.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
 		m_EDDy.SetInputMode(eck::CEditExt::InputMode::Int);
 		m_EDDy.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
-		m_LytMain.Add(&m_EDDy, iLine, 3, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_EDDy, iLine, 3, Mar, 0);
 
 		++iLine;
 
 		m_LATheme.Create(L"主题：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LATheme.SetAlign(FALSE, eck::Align::Center);
+		m_LATheme.SetAlignment(FALSE, eck::Align::Center);
 		m_LATheme.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LATheme, iLine, 0, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LATheme, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_CCBTheme.Create(nullptr, dwStyle, 0,
 			0, 0, 0, 0, hWnd, 0);
 		m_CCBTheme.GetListBox().SetItemCount(ARRAYSIZE(ItemsTheme));
-		m_LytMain.Add(&m_CCBTheme, iLine, 1, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_CCBTheme, iLine, 1, Mar, 0);
 
 		m_LAPadding.Create(L"行间距：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LAPadding.SetAlign(FALSE, eck::Align::Center);
+		m_LAPadding.SetAlignment(FALSE, eck::Align::Center);
 		m_LAPadding.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LAPadding, iLine, 2, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LAPadding, iLine, 2, Mar, eck::LF_IDEAL);
 
 		m_EDPadding.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
 		m_EDPadding.SetInputMode(eck::CEditExt::InputMode::Int);
 		m_EDPadding.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
-		m_LytMain.Add(&m_EDPadding, iLine, 3, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_EDPadding, iLine, 3, Mar, 0);
 
 		++iLine;
 
 		m_LAColor.Create(L"文本颜色：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LAColor.SetAlign(FALSE, eck::Align::Center);
+		m_LAColor.SetAlignment(FALSE, eck::Align::Center);
 		m_LAColor.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LAColor, iLine, 0, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LAColor, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_CPKColor.Create(nullptr, dwStyle, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytMain.Add(&m_CPKColor, iLine, 1, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_CPKColor, iLine, 1, Mar, 0);
 
 		m_EDColorAlpha.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
 		m_EDColorAlpha.SetInputMode(eck::CEditExt::InputMode::Byte);
 		m_EDColorAlpha.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
-		m_LytMain.Add(&m_EDColorAlpha, iLine, 2, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_EDColorAlpha, iLine, 2, Mar, 0);
 
 		++iLine;
 
 		m_LAFont1.Create(L"首行字体：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LAFont1.SetAlign(FALSE, eck::Align::Center);
+		m_LAFont1.SetAlignment(FALSE, eck::Align::Center);
 		m_LAFont1.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LAFont1, iLine, 0, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LAFont1, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_FPKFont1.Create(nullptr, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytMain.Add(&m_FPKFont1, iLine, 1, Mar, eck::LF_FILL, 0, 2);
+		m_LytMain.Add(&m_FPKFont1, iLine, 1, Mar, 0, 1, 2);
 
 		++iLine;
 
 		m_LAFont2.Create(L"次行字体：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LAFont2.SetAlign(FALSE, eck::Align::Center);
+		m_LAFont2.SetAlignment(FALSE, eck::Align::Center);
 		m_LAFont2.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LAFont2, iLine, 0, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LAFont2, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_FPKFont2.Create(nullptr, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytMain.Add(&m_FPKFont2, iLine, 1, Mar, eck::LF_FILL, 0, 2);
+		m_LytMain.Add(&m_FPKFont2, iLine, 1, Mar, 0, 1, 2);
 
 		++iLine;
 
 		m_LALine1.Create(L"首行文本：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LALine1.SetAlign(FALSE, eck::Align::Center);
+		m_LALine1.SetAlignment(FALSE, eck::Align::Center);
 		m_LALine1.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LALine1, iLine, 0, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LALine1, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_EDLine1.Create(nullptr, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytMain.Add(&m_EDLine1, iLine, 1, Mar, eck::LF_FILL, 0, 2);
+		m_LytMain.Add(&m_EDLine1, iLine, 1, Mar, 0, 1, 2);
 
 		++iLine;
 
 		m_LALine2.Create(L"次行文本：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LALine2.SetAlign(FALSE, eck::Align::Center);
+		m_LALine2.SetAlignment(FALSE, eck::Align::Center);
 		m_LALine2.SetTransparent(TRUE);
-		m_LytMain.Add(&m_LALine2, iLine, 0, Mar, eck::LF_FILL);
+		m_LytMain.Add(&m_LALine2, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_EDLine2.Create(nullptr, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytMain.Add(&m_EDLine2, iLine, 1, Mar, eck::LF_FILL, 0, 2);
+		m_LytMain.Add(&m_EDLine2, iLine, 1, Mar, 0, 1, 2);
 		iLine = 0;
 	}
 	m_LytTab.Add(&m_LytMain, {}, eck::LF_FILL_WIDTH | eck::LF_FIX_HEIGHT);
@@ -240,9 +235,9 @@ void CWndOptions::OnCreate(HWND hWnd)
 	{
 		m_LADtPos.Create(L"显示位置：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADtPos.SetAlign(FALSE, eck::Align::Center);
+		m_LADtPos.SetAlignment(FALSE, eck::Align::Center);
 		m_LADtPos.SetTransparent(TRUE);
-		m_LytDt.Add(&m_LADtPos, iLine, 0, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_LADtPos, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_CCBDtPos.Create(nullptr, dwStyle, 0,
 			0, 0, 0, 0, hWnd, 0);
@@ -251,15 +246,15 @@ void CWndOptions::OnCreate(HWND hWnd)
 
 		m_CBDtColorFont.Create(L"启用彩色字体", dwStyle | BS_AUTOCHECKBOX, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytDt.Add(&m_CBDtColorFont, iLine, 2, Mar, eck::LF_FILL, 0, 1);
+		m_LytDt.Add(&m_CBDtColorFont, iLine, 2, Mar, 0, 1, 2);
 
 		++iLine;
 
 		m_LADtDx.Create(L"水平边距：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADtDx.SetAlign(FALSE, eck::Align::Center);
+		m_LADtDx.SetAlignment(FALSE, eck::Align::Center);
 		m_LADtDx.SetTransparent(TRUE);
-		m_LytDt.Add(&m_LADtDx, iLine, 0, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_LADtDx, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_EDDtDx.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
@@ -269,9 +264,9 @@ void CWndOptions::OnCreate(HWND hWnd)
 
 		m_LADtDy.Create(L"垂直边距：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADtDy.SetAlign(FALSE, eck::Align::Center);
+		m_LADtDy.SetAlignment(FALSE, eck::Align::Center);
 		m_LADtDy.SetTransparent(TRUE);
-		m_LytDt.Add(&m_LADtDy, iLine, 2, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_LADtDy, iLine, 2, Mar, eck::LF_IDEAL);
 
 		m_EDDtDy.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
@@ -283,9 +278,9 @@ void CWndOptions::OnCreate(HWND hWnd)
 
 		m_LADtColor.Create(L"文本颜色：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADtColor.SetAlign(FALSE, eck::Align::Center);
+		m_LADtColor.SetAlignment(FALSE, eck::Align::Center);
 		m_LADtColor.SetTransparent(TRUE);
-		m_LytDt.Add(&m_LADtColor, iLine, 0, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_LADtColor, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_CPKDtColor.Create(nullptr, dwStyle, 0,
 			0, 0, 0, 0, hWnd, 0);
@@ -301,63 +296,63 @@ void CWndOptions::OnCreate(HWND hWnd)
 
 		m_LADtShadowColor.Create(L"阴影颜色：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADtShadowColor.SetAlign(FALSE, eck::Align::Center);
+		m_LADtShadowColor.SetAlignment(FALSE, eck::Align::Center);
 		m_LADtShadowColor.SetTransparent(TRUE);
-		m_LytDt.Add(&m_LADtShadowColor, iLine, 0, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_LADtShadowColor, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_CPKDtShadowColor.Create(nullptr, dwStyle, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytDt.Add(&m_CPKDtShadowColor, iLine, 1, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_CPKDtShadowColor, iLine, 1, Mar, 0);
 
 		m_EDDtShadowColorAlpha.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
 		m_EDDtShadowColorAlpha.SetInputMode(eck::CEditExt::InputMode::Byte);
 		m_EDDtShadowColorAlpha.GetSignal().Connect(this, &CWndOptions::EditArrowCtrl);
-		m_LytDt.Add(&m_EDDtShadowColorAlpha, iLine, 2, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_EDDtShadowColorAlpha, iLine, 2, Mar, 0);
 
 		++iLine;
 
 		m_LADtFont.Create(L"字体：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADtFont.SetAlign(FALSE, eck::Align::Center);
+		m_LADtFont.SetAlignment(FALSE, eck::Align::Center);
 		m_LADtFont.SetTransparent(TRUE);
 		m_LytDt.Add(&m_LADtFont, iLine, 0, Mar, eck::LF_FILL);
 
 		m_FPKDtFont.Create(nullptr, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
-		m_LytDt.Add(&m_FPKDtFont, iLine, 1, Mar, eck::LF_FILL, 0, 2);
+		m_LytDt.Add(&m_FPKDtFont, iLine, 1, Mar, 0, 1, 2);
 
 		++iLine;
 
 		m_LADtShadowRadius.Create(L"阴影半径：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADtShadowRadius.SetAlign(FALSE, eck::Align::Center);
+		m_LADtShadowRadius.SetAlignment(FALSE, eck::Align::Center);
 		m_LADtShadowRadius.SetTransparent(TRUE);
-		m_LytDt.Add(&m_LADtShadowRadius, iLine, 0, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_LADtShadowRadius, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_EDDtShadowRadius.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
 		m_EDDtShadowRadius.SetInputMode(eck::CEditExt::InputMode::Float);
-		m_LytDt.Add(&m_EDDtShadowRadius, iLine, 1, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_EDDtShadowRadius, iLine, 1, Mar, 0);
 
 		m_LADtShadowExtent.Create(L"阴影范围：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADtShadowExtent.SetAlign(FALSE, eck::Align::Center);
+		m_LADtShadowExtent.SetAlignment(FALSE, eck::Align::Center);
 		m_LADtShadowExtent.SetTransparent(TRUE);
-		m_LytDt.Add(&m_LADtShadowExtent, iLine, 2, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_LADtShadowExtent, iLine, 2, Mar, eck::LF_IDEAL);
 
 		m_EDDtShadowExtent.Create(0, dwStyle, WS_EX_CLIENTEDGE,
 			0, 0, 0, 0, hWnd, 0);
 		m_EDDtShadowExtent.SetInputMode(eck::CEditExt::InputMode::Float);
-		m_LytDt.Add(&m_EDDtShadowExtent, iLine, 3, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_EDDtShadowExtent, iLine, 3, Mar, 0);
 
 		++iLine;
 
 		m_LADtText.Create(L"文本：", dwStyleStatic, 0,
 			0, 0, 0, 0, hWnd, 0);
-		m_LADtText.SetAlign(FALSE, eck::Align::Center);
+		m_LADtText.SetAlignment(FALSE, eck::Align::Center);
 		m_LADtText.SetTransparent(TRUE);
-		m_LytDt.Add(&m_LADtText, iLine, 0, Mar, eck::LF_FILL);
+		m_LytDt.Add(&m_LADtText, iLine, 0, Mar, eck::LF_IDEAL);
 
 		m_EDDtText.SetAutoWrap(TRUE);
 		m_EDDtText.SetMultiLine(TRUE);
@@ -372,7 +367,7 @@ void CWndOptions::OnCreate(HWND hWnd)
 	m_Layout.Add(&m_Tab, {}, eck::LF_FILL, 1);
 	// 底部按钮
 	{
-		const MARGINS MarBtn{ xMar, 0, xMar, yMar };
+		const eck::LYTMARGINS MarBtn{ xMar, 0, xMar, yMar };
 		const auto cxBtn = eck::DpiScale(BtnWidth, m_iDpi);
 		const auto cyBtn = eck::DpiScale(BtnHeight, m_iDpi);
 		m_BTGitHub.Create(L" 饭桶中心", dwStyle | BS_PUSHBUTTON, 0,
@@ -385,13 +380,13 @@ void CWndOptions::OnCreate(HWND hWnd)
 			0, 0, cxBtn, cyBtn, hWnd, 0);
 		m_LytBtn.Add(&m_BTSave, MarBtn, eck::LF_FIX);
 	}
-	m_Layout.Add(&m_LytBtn, { .cyTopHeight = yMar }, eck::LF_FIX | eck::LF_ALIGN_FAR);
-	m_Layout.LoInitDpi(m_iDpi);
-	m_LytTab.LoInitDpi(m_iDpi);
+	m_Layout.Add(&m_LytBtn, { .t = yMar }, eck::LF_FIX | eck::LF_ALIGN_FAR);
+	m_Layout.LoInitializeDpi(m_iDpi);
+	m_LytTab.LoInitializeDpi(m_iDpi);
 
 	m_LytTab.ShowFrame(0);
 	UpdateDpi();
-	eck::SetFontForWndAndCtrl(hWnd, m_hFont);
+	eck::ApplyWindowFont(hWnd, m_hFont);
 	OptToUI();
 }
 
@@ -400,14 +395,19 @@ void CWndOptions::OnSize(LPARAM lParam)
 	int cxClient, cyClient;
 	ECK_GET_SIZE_LPARAM(cxClient, cyClient, lParam);
 
-	const auto dMar = eck::DpiScale(8, m_iDpi);
+	const auto dMar = eck::DpiScale(8.f, m_iDpi);
 
-	m_LytComm.SetColWidth(0, cxClient / 2 - dMar);
-	m_LytComm.SetColWidth(1, cxClient / 2 - dMar);
-	m_LytComm.CommitTableMetrics();
+	m_LytComm.SetColumnFixed(0, cxClient / 2 - dMar);
+	m_LytComm.SetColumnFixed(1, cxClient / 2 - dMar);
+
+    auto hDwp = BeginDeferWindowPos(8);
+    auto bDwp = m_Layout.LoDwpAttach(hDwp);
 	m_Layout.Arrange(dMar, dMar, cxClient - dMar * 2, cyClient - dMar * 2);
+	if (bDwp)
+		hDwp = m_Layout.LoDwpDetach();
+	EndDeferWindowPos(hDwp);
 
-	const auto dMarMin = eck::DpiScale(1, m_iDpi);
+	const auto dMarMin = eck::DpiScale(1.f, m_iDpi);
 	RECT rc;
 	GetClientRect(m_Tab.HWnd, &rc);
 	MapWindowRect(m_Tab.HWnd, HWnd, &rc);
@@ -417,20 +417,26 @@ void CWndOptions::OnSize(LPARAM lParam)
 	const auto cxLabel = eck::DpiScale(70, m_iDpi);
 	const auto cxContent = (cx - cxLabel * 2 - dMarMin * 2) / 2;
 
-	m_LytMain.SetColWidth(0, cxLabel);
-	m_LytMain.SetColWidth(1, cxContent);
-	m_LytMain.SetColWidth(2, cxLabel);
-	m_LytMain.SetColWidth(3, cxContent);
-	m_LytMain.CommitTableMetrics();
+	m_LytMain.SetColumnIdeal(0, 1);
+	m_LytMain.SetColumnFlex(1, 1);
+	m_LytMain.SetColumnIdeal(2, 1);
+	m_LytMain.SetColumnFlex(3, 1);
+	m_LytMain.RefreshTableColumnWeight();
 
-	m_LytDt.SetColWidth(0, cxLabel);
-	m_LytDt.SetColWidth(1, cxContent);
-	m_LytDt.SetColWidth(2, cxLabel);
-	m_LytDt.SetColWidth(3, cxContent);
-	m_LytDt.CommitTableMetrics();
+	m_LytDt.SetColumnIdeal(0, 1);
+	m_LytDt.SetColumnFlex(1, 1);
+	m_LytDt.SetColumnIdeal(2, 1);
+	m_LytDt.SetColumnFlex(3, 1);
+	m_LytDt.RefreshTableColumnWeight();
 
+	hDwp = BeginDeferWindowPos(30);
+	bDwp = m_LytTab.LoDwpAttach(hDwp);
 	m_LytTab.Arrange(rc.left + dMarMin, rc.top + dMarMin,
 		cx - dMarMin * 2, cy - dMarMin * 2);
+    if (bDwp)
+        hDwp = m_LytTab.LoDwpDetach();
+
+    EndDeferWindowPos(hDwp);
 }
 
 void CWndOptions::ColorOptToUI()
@@ -500,34 +506,34 @@ void CWndOptions::OptToUI()
 	m_CBAutoRun.SetCheckState(!!Opt.bAutoRun);
 	m_CBExcludeFromSnapshot.SetCheckState(!!Opt.bExcludeFromSnapshot);
 
-	m_CCBPos.GetListBox().SetCurrSel((int)Opt.ePos);
+	m_CCBPos.GetListBox().SetCurrentSelection((int)Opt.ePos);
 	swprintf(szBuf, L"%d", Opt.cyPadding);
 	m_EDPadding.SetText(szBuf);
 	swprintf(szBuf, L"%d", Opt.dx);
 	m_EDDx.SetText(szBuf);
 	swprintf(szBuf, L"%d", Opt.dy);
 	m_EDDy.SetText(szBuf);
-	m_CCBTheme.GetListBox().SetCurrSel((int)Opt.eTheme);
+	m_CCBTheme.GetListBox().SetCurrentSelection((int)Opt.eTheme);
 	fpki.pszFontName = Opt.Font1.Data();
 	fpki.iPointSize = Opt.iPoint1;
 	fpki.iWeight = Opt.iWeight1;
-	m_FPKFont1.FromInfo(fpki);
+	m_FPKFont1.FromInformation(fpki);
 	fpki.pszFontName = Opt.Font2.Data();
 	fpki.iPointSize = Opt.iPoint2;
 	fpki.iWeight = Opt.iWeight2;
-	m_FPKFont2.FromInfo(fpki);
+	m_FPKFont2.FromInformation(fpki);
 	m_EDLine1.SetText(Opt.rsLine1.Data());
 	m_EDLine2.SetText(Opt.rsLine2.Data());
 	m_CBColorFont.SetCheckState(!!Opt.bColorFont);
 	ColorOptToUI();
 
 	m_CBDtColorFont.SetCheckState(!!Opt.bDtColorFont);
-	m_CCBDtPos.GetListBox().SetCurrSel((int)Opt.eDtPos);
+	m_CCBDtPos.GetListBox().SetCurrentSelection((int)Opt.eDtPos);
 	swprintf(szBuf, L"%d", Opt.dxDt);
 	m_EDDtDx.SetText(szBuf);
 	swprintf(szBuf, L"%d", Opt.dyDt);
 	m_EDDtDy.SetText(szBuf);
-	m_FPKDtFont.FromInfo({ Opt.rsDtFont.Data(), Opt.iDtPoint, Opt.iDtWeight });
+	m_FPKDtFont.FromInformation({ Opt.rsDtFont.Data(), Opt.iDtPoint, Opt.iDtWeight });
 	m_EDDtText.SetText(Opt.rsDtText.Data());
 	swprintf(szBuf, L"%g", Opt.fDtShadowRadius);
 	m_EDDtShadowRadius.SetText(szBuf);
@@ -544,7 +550,7 @@ void CWndOptions::UIToOpt()
 	Opt.bAutoRun = !!m_CBAutoRun.GetCheckState();
 	Opt.bExcludeFromSnapshot = !!m_CBExcludeFromSnapshot.GetCheckState();
 
-	Opt.ePos = (PosType)m_CCBPos.GetListBox().GetCurrSel();
+	Opt.ePos = (PosType)m_CCBPos.GetListBox().GetCurrentSelection();
 	WCHAR szBuf[eck::CchI32ToStrBufNoRadix2];
 	szBuf[0] = L'\0';
 	m_EDPadding.GetText(szBuf, ARRAYSIZE(szBuf));
@@ -555,12 +561,12 @@ void CWndOptions::UIToOpt()
 	szBuf[0] = L'\0';
 	m_EDDy.GetText(szBuf, ARRAYSIZE(szBuf));
 	Opt.dy = (int)_wtoi(szBuf);
-	Opt.eTheme = (ThemeType)m_CCBTheme.GetListBox().GetCurrSel();
+	Opt.eTheme = (ThemeType)m_CCBTheme.GetListBox().GetCurrentSelection();
 	eck::FONTPICKERINFO fpki;
-	Opt.Font1 = m_FPKFont1.ToInfo(fpki);
+	Opt.Font1 = m_FPKFont1.ToInfomation(fpki);
 	Opt.iPoint1 = fpki.iPointSize;
 	Opt.iWeight1 = fpki.iWeight;
-	Opt.Font2 = m_FPKFont2.ToInfo(fpki);
+	Opt.Font2 = m_FPKFont2.ToInfomation(fpki);
 	Opt.iPoint2 = fpki.iPointSize;
 	Opt.iWeight2 = fpki.iWeight;
 	Opt.rsLine1 = m_EDLine1.GetText();
@@ -569,14 +575,14 @@ void CWndOptions::UIToOpt()
 	UIToColorOpt();
 
 	Opt.bDtColorFont = !!m_CBDtColorFont.GetCheckState();
-	Opt.eDtPos = (PosType)m_CCBDtPos.GetListBox().GetCurrSel();
+	Opt.eDtPos = (PosType)m_CCBDtPos.GetListBox().GetCurrentSelection();
 	szBuf[0] = L'\0';
 	m_EDDtDx.GetText(szBuf, ARRAYSIZE(szBuf));
 	Opt.dxDt = (int)_wtoi(szBuf);
 	szBuf[0] = L'\0';
 	m_EDDtDy.GetText(szBuf, ARRAYSIZE(szBuf));
 	Opt.dyDt = (int)_wtoi(szBuf);
-	Opt.rsDtFont = m_FPKDtFont.ToInfo(fpki);
+	Opt.rsDtFont = m_FPKDtFont.ToInfomation(fpki);
 	Opt.iDtPoint = fpki.iPointSize;
 	Opt.iDtWeight = fpki.iWeight;
 	Opt.rsDtText = m_EDDtText.GetText();
@@ -595,10 +601,13 @@ void CWndOptions::UIToOpt()
 
 void CWndOptions::UpdateTableLayoutRowHeight()
 {
-	const auto cyLine = eck::DpiScale(30, m_iDpi);
-	m_LytComm.SetRowHeight(cyLine);
-	m_LytMain.SetRowHeight(cyLine);
-	m_LytDt.SetRowHeight(cyLine);
+	const auto cyLine = eck::DpiScale(30.f, m_iDpi);
+	m_LytComm.SetAllRowFixed(cyLine);
+	m_LytComm.CommitTableSize();
+	m_LytMain.SetAllRowFixed(cyLine);
+	m_LytMain.CommitTableSize();
+	m_LytDt.SetAllRowFixed(cyLine);
+	m_LytDt.CommitTableSize();
 }
 
 LRESULT CWndOptions::EditArrowCtrl(HWND hWnd, UINT uMsg,
@@ -684,7 +693,7 @@ LRESULT CWndOptions::EditMultiLineCtrl(HWND hWnd, UINT uMsg,
 	return 0;
 }
 
-LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CWndOptions::OnMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	switch (uMsg)
 	{
@@ -715,7 +724,7 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			return TRUE;
 			case eck::NM_LBN_ITEMCHANGED:
 			{
-				App.GetOpt().eTheme = (ThemeType)m_CCBTheme.GetListBox().GetCurrSel();
+				App.GetOpt().eTheme = (ThemeType)m_CCBTheme.GetListBox().GetCurrentSelection();
 				ColorOptToUI();
 				if (App.GetOpt().eTheme == ThemeType::Auto)
 				{
@@ -760,7 +769,7 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 			case TCN_SELCHANGE:
 			{
 				SetRedraw(FALSE);
-				m_LytTab.ShowFrame(m_Tab.GetCurSel());
+				m_LytTab.ShowFrame(m_Tab.GetCurrentSelection());
 				SetRedraw(TRUE);
 				RECT rc;
 				GetClientRect(m_Tab.HWnd, &rc);
@@ -832,17 +841,17 @@ LRESULT CWndOptions::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	}
 	break;
 	}
-	return __super::OnMsg(hWnd, uMsg, wParam, lParam);
+	return __super::OnMessage(hWnd, uMsg, wParam, lParam);
 }
 
-BOOL CWndOptions::PreTranslateMessage(const MSG& Msg)
+BOOL CWndOptions::PreTranslateMessage(const MSG& Msg) noexcept
 {
 	if (IsDialogMessageW(HWnd, (MSG*)&Msg))
 		return TRUE;
 	return __super::PreTranslateMessage(Msg);
 }
 
-void CWndOptions::OnTrayNotify(UINT uMsg, UINT uID, int x, int y)
+void CWndOptions::OnTrayNotify(UINT uMsg, UINT uID, int x, int y) noexcept
 {
 	if (uMsg == WM_LBUTTONDBLCLK)
 	{

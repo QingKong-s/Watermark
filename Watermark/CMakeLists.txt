@@ -11,7 +11,7 @@ add_executable(Watermark WIN32
 	"CWndMain.cpp"
 	"CWndOptions.cpp"
 	"CWndDesktopText.cpp"
- "Utils.h" "Utils.cpp")
+	"Utils.cpp")
 
 target_compile_definitions(Watermark PRIVATE
 	ECK_OPT_NO_YYJSON=1

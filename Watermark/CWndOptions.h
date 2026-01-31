@@ -120,9 +120,9 @@ public:
 	ECK_CWND_SINGLEOWNER(CWndOptions);
 	ECK_CWND_CREATE_CLS_HINST(eck::WCN_DUMMY, eck::g_hInstance);
 
-	BOOL PreTranslateMessage(const MSG& Msg) override;
+	BOOL PreTranslateMessage(const MSG& Msg) noexcept override;
 
-	LRESULT OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+	LRESULT OnMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override;
 
-	void OnTrayNotify(UINT uMsg, UINT uID, int x, int y) override;
+	void OnTrayNotify(UINT uMsg, UINT uID, int x, int y) noexcept override;
 };

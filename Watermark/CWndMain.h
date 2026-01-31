@@ -43,7 +43,7 @@ public:
 		App.GetSignal().Connect(this, &CWndMain::OnAppEvent);
 	}
 
-	LRESULT OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+	LRESULT OnMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override;
 
-	void UpdatePos();
+	void UpdatePosition();
 };

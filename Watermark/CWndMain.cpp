@@ -8,7 +8,7 @@ LRESULT CWndMain::OnCreate(HWND hWnd, CREATESTRUCT* pcs)
 
 	constexpr BOOL b{ 1 };
 	DwmSetWindowAttribute(hWnd, DWMWA_EXCLUDED_FROM_PEEK, &b, sizeof(b));
-	eck::GetThreadCtx()->UpdateDefColor();
+	eck::PtcCurrent()->UpdateDefaultColor();
 	m_iDpi = eck::GetDpi(hWnd);
 
 	RECT rcClient;
@@ -88,7 +88,7 @@ void CWndMain::ReCreateMemoryDC()
 		.dpiX = 96.f,
 		.dpiY = 96.f,
 	};
-	eck::g_pD2dFactory->CreateDCRenderTarget(&RtProps, &m_pRenderTarget);
+	eck::g_pD2DFactory->CreateDCRenderTarget(&RtProps, &m_pRenderTarget);
 	m_pRenderTarget->CreateSolidColorBrush({}, &m_pBrush);
 	m_pRenderTarget->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
 	const RECT rcSub{ 0,0,m_cxClient, m_cyClient };
@@ -136,10 +136,10 @@ void CWndMain::OnAppEvent(const APP_NOTIFY& n)
 	if (n.uFlags & ANF_MA_UPDATE_COLOR)
 		Paint();
 	if (n.uFlags & ANF_MA_UPDATE_POS)
-		UpdatePos();
+		UpdatePosition();
 }
 
-LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT CWndMain::OnMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept
 {
 	switch (uMsg)
 	{
@@ -154,11 +154,11 @@ LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return OnCreate(hWnd, (CREATESTRUCT*)lParam);
 
 	case WM_SYSCOLORCHANGE:
-		eck::MsgOnSysColorChangeMainWnd(hWnd, wParam, lParam);
+		eck::MsgOnSystemColorChangeMainWindow(hWnd, wParam, lParam);
 		break;
 	case WM_SETTINGCHANGE:
 		eck::MsgOnSettingChangeFixDpiAwareV2(hWnd, wParam, lParam);
-		if (eck::MsgOnSettingChangeMainWnd(hWnd, wParam, lParam))
+		if (eck::MsgOnSettingChangeMainWindow(hWnd, wParam, lParam))
 			Paint();
 		break;
 	case WM_DPICHANGED:
@@ -167,10 +167,10 @@ LRESULT CWndMain::OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		UpdatePosSize();
 		break;
 	}
-	return __super::OnMsg(hWnd, uMsg, wParam, lParam);
+	return __super::OnMessage(hWnd, uMsg, wParam, lParam);
 }
 
-void CWndMain::UpdatePos()
+void CWndMain::UpdatePosition()
 {
 	int x, y;
 	CalcWindowPosition(m_cxClient, m_cyClient, x, y);

@@ -25,7 +25,7 @@ private:
 
 	void Paint();
 
-	void UpdatePos();
+	void UpdatePosition();
 
 	// 重新创建内存DC和Dw渲染目标
 	// 使用m_cxClient和m_cyClient指定的尺寸
@@ -49,5 +49,5 @@ public:
 		App.GetSignal().Connect(this, &CWndDesktopText::OnAppEvent);
 	}
 
-	LRESULT OnMsg(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) override;
+	LRESULT OnMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override;
 };
