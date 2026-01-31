@@ -36,12 +36,12 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 #ifndef _DEBUG
     if (App.GetOpt().bUia && bAdmin)
     {
-        if (!eck::UiaIsAcquired())
+        eck::CUiAccess Uia{};
+        if (!Uia.IsAcquired())
         {
-            eck::UIA uia;
-            NTSTATUS nts = eck::UiaTryAcquire(uia);
+            const auto nts = Uia.TryAcquire();
             if (NT_SUCCESS(nts))
-                eck::UiaRestart(uia);
+                Uia.Restart();
             else
             {
                 eck::CRefStrW rs{};

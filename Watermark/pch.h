@@ -1,7 +1,7 @@
 ﻿#pragma once
 #include "eck\PchInc.h"
 #include "eck\CCommDlg.h"
-#include "eck\UIAccess.h"
+#include "eck\CUiAccess.h"
 #include "eck\CForm.h"
 #include "eck\CButton.h"
 #include "eck\CComboBoxNew.h"
