@@ -18,9 +18,12 @@
 #include "eck\CFrameLayout.h"
 #include "eck\DwLayoutPath.h"
 #include "eck\SystemHelper.h"
+#include "eck\CTrayIcon.h"
 
 #define SECURITY_WIN32 1
 #include <security.h>
 
 using eck::ComPtr;
 using eck::SafeRelease;
+
+using namespace std::literals;

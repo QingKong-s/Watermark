@@ -89,6 +89,8 @@ private:
 
 	eck::CLinearLayoutV m_Layout{};
 
+    eck::CTrayIcon m_TrayIcon{};
+
 	HFONT m_hFont{};
 	int m_iDpi{ USER_DEFAULT_SCREEN_DPI };
 	BOOL m_bExitMsgBox{};
@@ -123,6 +125,4 @@ public:
 	BOOL PreTranslateMessage(const MSG& Msg) noexcept override;
 
 	LRESULT OnMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) noexcept override;
-
-	void OnTrayNotify(UINT uMsg, UINT uID, int x, int y) noexcept override;
 };
